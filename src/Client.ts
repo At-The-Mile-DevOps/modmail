@@ -1,8 +1,8 @@
 import path from "path";
-import { ExtendedClient } from "../@types/types";
+import { ExtendedClient } from "./@types/types";
 import { ActivityType, Client, Collection, GatewayIntentBits, Partials, REST, Routes } from "discord.js";
 import fs from "fs"
-import catLogger from "../utils/catloggr";
+import catLogger from "./utils/catloggr";
 
 /**
  * Class for the Discord.JS client instantiation of the bot.

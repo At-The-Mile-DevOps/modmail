@@ -1,8 +1,13 @@
 {
   "name": "atm-modmail",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "find dist -name \\*.js -type f -delete && tsc && node dist/index.js",
+    "dev": "find dist -name \\*.js -type f -delete && tsc && node dist/index.js true"
+  },
   "dependencies": {
     "cat-loggr": "^1.2.2",
     "discord.js": "^14.15.3",
