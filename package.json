@@ -1,0 +1,12 @@
+{
+  "name": "atm-modmail",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "cat-loggr": "^1.2.2",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.4.5"
+  }
+}
