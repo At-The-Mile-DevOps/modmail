@@ -9,9 +9,11 @@
     "dev": "find dist -name \\*.js -type f -delete && tsc && node dist/index.js true"
   },
   "dependencies": {
+    "@prisma/client": "5.14.0",
     "cat-loggr": "^1.2.2",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
+    "prisma": "^5.14.0",
     "typescript": "^5.4.5"
   }
 }

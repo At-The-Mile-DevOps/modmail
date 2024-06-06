@@ -3,6 +3,7 @@ import { ExtendedClient } from "./@types/types";
 import { ActivityType, Client, Collection, GatewayIntentBits, Partials, REST, Routes } from "discord.js";
 import fs from "fs"
 import catLogger from "./utils/catloggr";
+import LogEmitter from "./handlers/LogEmitter";
 
 /**
  * Class for the Discord.JS client instantiation of the bot.
@@ -33,7 +34,7 @@ export default class ModMailClient {
 			Partials.Message,
 			Partials.Channel,
 			Partials.User,
-			Partials.Reaction,
+			Partials.Reaction
 		],
 	}) as ExtendedClient;
 
@@ -96,7 +97,8 @@ export default class ModMailClient {
 					name: "with HR files",
 				});
 			}
-		});
+			LogEmitter.emit('init')
+		})
 	}
 
 	/**
@@ -131,8 +133,8 @@ export default class ModMailClient {
 				catLogger.client(`Successfully deployed ${cmds.length} commands.`),
 			)
 			.catch((err: Error) => {
-				catLogger.error(`Command deployment issue - stack attached.`);
-				catLogger.error(err.message);
+				catLogger.debug(`Command deployment issue - stack attached.`);
+				catLogger.debug(err.message);
 				process.exit(1);
 			});
 	}
