@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./main.db"
+}
+
+model Role {
+  id     Int    @id @default(autoincrement())
+  name   String
+  permit Int
+}
+
+model ModMailStatus {
+  discordId String   @id
+  channel   String?
+  claimed   Boolean
+  openTime  DateTime @default(now())
+  claimedBy String?
+}
+
+model ModMailMessage {
+  discordId  String
+  author     String
+  sequence   Int
+  link       String
+  staffMsgId String
+  content    String
+  msgId      String
+  anon       Boolean @default(false)
+  name       String?
+
+  @@id(name: "messageSequenceId", [discordId, msgId])
+}
+
+model SubbedForMessages {
+  senderId String
+  claimId  String
+
+  @@id([senderId, claimId])
+}
+
+model Snippets {
+  name String  @id
+  desc String
+  anon Boolean @default(false)
+}
+
+model Categories {
+  channelId String @id
+  name      String
+}
+
+model PendingMessages {
+  discordId   String @id
+  content     String
+}
