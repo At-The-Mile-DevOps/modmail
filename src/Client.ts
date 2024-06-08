@@ -73,9 +73,9 @@ export default class ModMailClient {
 			const filePath = path.join(eventsDir, file);
 			const event = require(filePath);
 			if (event.once) {
-				this.client.once(event.name, (...args) => event.execute(...args));
+				this.client.once(event.name, (...args: any[]) => event.execute(...args));
 			} else {
-				this.client.on(event.name, (...args) => event.execute(...args));
+				this.client.on(event.name, (...args: any[]) => event.execute(...args));
 			}
 			catLogger.client(`Deploying listener ${file} on event ${event.name}...`);
 		}

@@ -13,9 +13,8 @@ datasource db {
   url      = "file:./main.db"
 }
 
-model Role {
-  id     Int    @id @default(autoincrement())
-  name   String
+model AccessGate {
+  user   String @id
   permit Int
 }
 
