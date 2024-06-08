@@ -1,4 +1,5 @@
 import client, { prisma } from ".."
+import {Permit} from "../@types/types";
 
 export default class ModMailPrisma {
 	public static GET = class {
@@ -82,6 +83,17 @@ export default class ModMailPrisma {
 				})
 				return message
 			}
+		}
+
+		public static async getUserPermit(discordId: string): Promise<Permit> {
+			const user = await prisma.accessGate.findFirst({
+				where: {
+					user: discordId
+				}
+			})
+
+			if (!user) return Permit.COMMUNITY
+			else return user.permit as Permit
 		}
 	}
 	public static POST = class {
