@@ -143,6 +143,19 @@ export default class ModMailPrisma {
 				}
 			})
 		}
+
+		public static async addNewSnippet(name: string, val: string) {
+			try {
+				return prisma.snippets.create({
+					data: {
+						name,
+						val
+					}
+				})
+			} catch (e: any) {
+				return false
+			}
+		}
 	}
 
 	public static DELETE = class {

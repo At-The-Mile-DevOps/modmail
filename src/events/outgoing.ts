@@ -10,6 +10,7 @@ import staffContactFlow from "../handlers/staffContact";
 import ticketCloseFlow from "../handlers/ticketClose";
 import categoryFlow from "../handlers/categories";
 import transferFlow from "../handlers/transfer";
+import snippetFlow from "../handlers/snippet";
 
 module.exports = {
 	name: Events.MessageCreate,
@@ -27,19 +28,19 @@ module.exports = {
 				return await anonStaffReplyFlow(message)
 			}
 			case "contact": {
-				const [user, status] = await staffContactFlow(message)
-				return LogEmitter.emit('contact', user, !status)
+				return await staffContactFlow(message)
 			}
 			case "close": {
-				const [status, ticketUser, closedBy] = await ticketCloseFlow(message)
-				if (!status) return LogEmitter.emit("close", false)
-				else return LogEmitter.emit("close", true, ticketUser, closedBy)
+				return await ticketCloseFlow(message)
 			}
 			case "categories": {
 				return await categoryFlow(message)
 			}
 			case "transfer": {
 				return await transferFlow(message)
+			}
+			case "snippets": {
+				return await snippetFlow(message)
 			}
 		}
 	}

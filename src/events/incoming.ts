@@ -16,20 +16,8 @@ module.exports = {
 		if (message.author.id !== "413462464022446084") return
 		const channel = await ModMailPrisma.GET.getUserTicketObject(message.author.id)
 		if (!channel || !channel.channel) {
-			const bufferMsg = await ModMailPrisma.GET.getTemporaryMessage(message.author.id)
-			if (!bufferMsg) {
-				const categories = (await ModMailPrisma.GET.getCategoryList()).map(e => e.name)
-				categories.forEach(e => e = `\`${e}\``)
-				const embed = new EmbedBuilder()
-					.setTitle("New ModMail Ticket")
-					.setDescription(`**Hey there!** Thanks for contacting us. Before we start, please send one of the categories below that you feel this ticket best fits into. If none of these seem right, just say 'other'. If you've changed your mind, say 'cancel'.\n\n${categories.join("\n")}`)
-					.setColor(0x770202)
-					.setFooter({ text: "At The Mile ModMail" })
-				await ModMailPrisma.POST.addTemporaryMessage(message.author.id, message.content)
-				await message.reply({ embeds: [embed] })
-			} else {
-				await ticketOpenFlow(message, bufferMsg)
-			}
+			
+			await ticketOpenFlow(message)
 		} else {
 			await ticketReplyFlow(message, channel)
 		}

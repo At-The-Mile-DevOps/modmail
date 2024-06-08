@@ -49,9 +49,8 @@ model SubbedForMessages {
 }
 
 model Snippets {
-  name String  @id
-  desc String
-  anon Boolean @default(false)
+  name String @id
+  val  String
 }
 
 model Categories {
@@ -60,6 +59,6 @@ model Categories {
 }
 
 model PendingMessages {
-  discordId   String @id
-  content     String
+  discordId String @id
+  content   String
 }
