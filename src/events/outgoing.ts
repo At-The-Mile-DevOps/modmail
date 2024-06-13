@@ -9,6 +9,7 @@ import categoryFlow from "../handlers/categories";
 import transferFlow from "../handlers/transfer";
 import snippetFlow from "../handlers/snippet";
 import {Permit} from "../@types/types";
+import staffEditFlow from "../handlers/staffEdit";
 
 module.exports = {
 	name: Events.MessageCreate,
@@ -38,11 +39,14 @@ module.exports = {
 			case "categories": {
 				return await categoryFlow(message)
 			}
-			case "transfer": {
-				return await transferFlow(message)
+			case "edit": {
+				return await staffEditFlow(message)
 			}
 			case "snippets": {
 				return await snippetFlow(message)
+			}
+			case "transfer": {
+				return await transferFlow(message)
 			}
 		}
 	}

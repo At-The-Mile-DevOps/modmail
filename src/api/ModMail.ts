@@ -119,7 +119,7 @@ export default class ModMailPrisma {
 			})
 		}
 
-		public static async createNewSequencedMessage(ticketDiscordId: string, author: string, link: string, content: string, userMsgId: string, staffMsgId: string, anon: boolean, name: string) {
+		public static async createNewSequencedMessage(ticketDiscordId: string, author: string, link: string, content: string, userMsgId: string, staffMsgId: string, anon: boolean, name: string, staff: boolean = false) {
 			const existingSequence = await prisma.modMailMessage.findFirst({
 				select: {
 					sequence: true
@@ -132,7 +132,7 @@ export default class ModMailPrisma {
 				}
 			})
 
-			const sequence = (existingSequence ? existingSequence.sequence : 0)
+			const sequence = (existingSequence ? existingSequence.sequence : 0) + 1
 
 			await prisma.modMailMessage.create({
 				data: {
@@ -144,7 +144,8 @@ export default class ModMailPrisma {
 					content,
 					msgId: userMsgId,
 					anon,
-					name
+					name,
+					staff
 				}
 			})
 		}
@@ -182,21 +183,51 @@ export default class ModMailPrisma {
 	}
 
 	public static PATCH = class {
-		public static async updateMessageContent(discordId: string, messageId: string, newText: string) {
-			try {
-				return prisma.modMailMessage.update({
+		public static async updateMessageContent(discordId: string, newText: string, msgId?: string) {
+			// finds and edits latest (staff)
+			if (!msgId) {
+				const latest = await prisma.modMailMessage.findFirst({
+					where: {
+						author: discordId,
+						staff: true
+					},
+					orderBy: {
+						sequence: "desc"
+					}
+				})
+				if (!latest) return false
+				else return prisma.modMailMessage.update({
 					where: {
 						messageSequenceId: {
-							discordId,
-							msgId: messageId
+							discordId: latest.discordId,
+							sequence: latest.sequence
 						}
 					},
 					data: {
 						content: newText
 					}
+				});
+
+			// finds and edits by msgId (user)
+			} else {
+				const latest = await prisma.modMailMessage.findFirst({
+					where: {
+						discordId,
+						msgId
+					}
 				})
-			} catch (e: any) {
-				return false
+				if (!latest) return false
+				else return prisma.modMailMessage.update({
+					where: {
+						messageSequenceId: {
+							discordId,
+							sequence: latest.sequence
+						}
+					},
+					data: {
+						content: newText
+					}
+				});
 			}
 		}
 	}

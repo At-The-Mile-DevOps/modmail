@@ -20,9 +20,8 @@ module.exports = {
         const newContent = newMessage.content
         const modMailStatus = await ModMailPrisma.GET.getUserTicketObject(oldMessage.author.id)
         if (!modMailStatus) return
-        const messageEdit = await ModMailPrisma.PATCH.updateMessageContent(authorId, oldMessageId, newContent)
-        if (!(await ModMailPrisma.GET.checkIfMessageValid(authorId, oldMessageId))) return
-        if (!messageEdit) return
+        const messageEdit = await ModMailPrisma.PATCH.updateMessageContent(authorId, newContent, oldMessageId)
+        if (!(await ModMailPrisma.GET.checkIfMessageValid(authorId, oldMessageId)) || !messageEdit) return
         const guild = await client.client.guilds.fetch(settings.GUILD_ID)
         const channel = await guild.channels.fetch(modMailStatus.channel!) as TextBasedChannel
         const oldStaffMessage = await channel.messages.fetch(messageEdit.staffMsgId)
