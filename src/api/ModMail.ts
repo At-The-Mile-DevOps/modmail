@@ -58,13 +58,23 @@ export default class ModMailPrisma {
 		public static async printTranscript(discordId: string) {
 			const output = await prisma.modMailMessage.findMany({
 				where: {
-					discordId
+					discordId,
+					hidden: false
 				}
 			})
 			let printOutput = output.map(entry => `${entry.anon ? "Anonymous" : `${entry.name} (${entry.author})`}: ${entry.content}`)
 			printOutput.unshift(`Ticket Transcript for ${discordId}:`)
 
-			return printOutput
+			const staffQuery = await prisma.modMailMessage.findMany({
+				where: {
+					discordId
+				}
+			})
+
+			const staffOutput = staffQuery.map(entry => `${entry.hidden ? "(Hidden Message) " : ""}${entry.anon ? "Anonymous" : `${entry.name} (${entry.author})`}: ${entry.content}`)
+			staffOutput.unshift(`Staff Ticket Transcript for ${discordId}:`)
+
+			return [printOutput, staffOutput]
 		}
 
 		public static async getTemporaryMessage(discordId: string) {
@@ -119,7 +129,17 @@ export default class ModMailPrisma {
 			})
 		}
 
-		public static async createNewSequencedMessage(ticketDiscordId: string, author: string, link: string, content: string, userMsgId: string, staffMsgId: string, anon: boolean, name: string, staff: boolean = false) {
+		public static async createNewSequencedMessage(
+			ticketDiscordId: string,
+			author: string,
+			link: string,
+			content: string,
+			userMsgId: string,
+			staffMsgId: string,
+			anon: boolean,
+			name: string,
+			staff: boolean = false,
+			hidden: boolean = false) {
 			const existingSequence = await prisma.modMailMessage.findFirst({
 				select: {
 					sequence: true
@@ -145,7 +165,8 @@ export default class ModMailPrisma {
 					msgId: userMsgId,
 					anon,
 					name,
-					staff
+					staff,
+					hidden
 				}
 			})
 		}
@@ -189,7 +210,8 @@ export default class ModMailPrisma {
 				const latest = await prisma.modMailMessage.findFirst({
 					where: {
 						author: discordId,
-						staff: true
+						staff: true,
+						hidden: false
 					},
 					orderBy: {
 						sequence: "desc"
