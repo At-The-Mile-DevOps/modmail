@@ -18,5 +18,5 @@ export default async function anonStaffReplyFlow(message: Message) {
 	await message.delete()
 	const staffSentMessage = await message.channel.send({ embeds: [ embed ] })
 
-	return await ModMailPrisma.POST.createNewSequencedMessage(user, message.author.id, message.url, content.join(" "), userSentMessage.id, staffSentMessage.id, true, staffMember.displayName)
+	return await ModMailPrisma.POST.createNewSequencedMessage(user, message.author.id, message.url, content.join(" "), userSentMessage.id, staffSentMessage.id, true, staffMember.displayName, true)
 }
