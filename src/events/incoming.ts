@@ -10,9 +10,9 @@ module.exports = {
 	once: false,
 	async execute(message: Message) {
 		if (message.channel.type !== ChannelType.DM) return
-		if (message.author.bot) return await message.reply({ content: "You currently do not have permission to access this ModMail feature." })
+		if (message.author.bot) return
 		const permit = await ModMailPrisma.GET.getUserPermit(message.author.id)
-		if (permit < Permit.EARLY_ACCESS_STAFF) return
+		if (permit < Permit.EARLY_ACCESS_STAFF) return await message.reply({ content: "You currently do not have permission to access this ModMail feature." })
 		const channel = await ModMailPrisma.GET.getUserTicketObject(message.author.id)
 		if (!channel || !channel.channel) {
 			

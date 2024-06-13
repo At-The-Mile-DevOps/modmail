@@ -15,6 +15,9 @@ module.exports = {
 	once: false,
 	async execute(message: Message) {
 		const user = await ModMailPrisma.GET.getUserPermit(message.author.id)
+		const initialMsg = message.content.split(" ")[0]
+		if (!initialMsg.startsWith(settings.prefix)) return
+		if (message.author.bot) return
 		if (user < Permit.EARLY_ACCESS_STAFF) return await message.reply({ content: "You currently do not have permission to access this ModMail feature." })
 		const command = message.content.split(" ")[ 0 ].slice(settings.prefix.length)
 		switch (command) {
