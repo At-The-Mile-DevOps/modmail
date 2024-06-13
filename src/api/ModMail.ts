@@ -55,6 +55,23 @@ export default class ModMailPrisma {
 			return prisma.categories.findMany()
 		}
 
+		public static async getCategoryBySearch(query: string) {
+			return prisma.categories.findMany({
+				where: {
+					OR: [
+						{
+							name: {
+								contains: query
+							}
+						},
+						{
+							short: query
+						}
+					]
+				}
+			})
+		}
+
 		public static async printTranscript(discordId: string) {
 			const output = await prisma.modMailMessage.findMany({
 				where: {

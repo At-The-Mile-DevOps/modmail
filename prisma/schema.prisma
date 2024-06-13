@@ -55,8 +55,9 @@ model Snippets {
 }
 
 model Categories {
-  channelId String @id
+  channelId String  @id
   name      String
+  short     String?
 }
 
 model PendingMessages {
