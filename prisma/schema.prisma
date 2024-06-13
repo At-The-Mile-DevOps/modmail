@@ -36,8 +36,9 @@ model ModMailMessage {
   msgId      String
   anon       Boolean @default(false)
   name       String?
+  staff      Boolean @default(false)
 
-  @@id(name: "messageSequenceId", [discordId, msgId])
+  @@id(name: "messageSequenceId", [discordId, sequence])
 }
 
 model SubbedForMessages {
