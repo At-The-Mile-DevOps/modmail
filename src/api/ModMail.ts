@@ -95,6 +95,17 @@ export default class ModMailPrisma {
 			if (!user) return Permit.COMMUNITY
 			else return user.permit as Permit
 		}
+
+		public static async checkIfMessageValid(discordId: string, msgId: string) {
+			const messages = await prisma.modMailMessage.findFirst({
+				where: {
+					msgId,
+					discordId
+				}
+			})
+
+			return !(messages === null)
+		}
 	}
 	public static POST = class {
 		public static async createNewModmailThread(discordId: string, channel: string, claimedBy?: string) {
@@ -162,6 +173,26 @@ export default class ModMailPrisma {
 					data: {
 						name,
 						val
+					}
+				})
+			} catch (e: any) {
+				return false
+			}
+		}
+	}
+
+	public static PATCH = class {
+		public static async updateMessageContent(discordId: string, messageId: string, newText: string) {
+			try {
+				return prisma.modMailMessage.update({
+					where: {
+						messageSequenceId: {
+							discordId,
+							msgId: messageId
+						}
+					},
+					data: {
+						content: newText
 					}
 				})
 			} catch (e: any) {
