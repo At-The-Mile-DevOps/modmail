@@ -1,5 +1,5 @@
 import { BannedUsers, Categories, ModMailMessage, ModMailStatus, PendingMessages, Snippets } from "@prisma/client";
-import client, { prisma } from ".."
+import { prisma } from ".."
 import { Permit } from "../@types/types";
 import { v4 as uuidv4 } from "uuid"
 
