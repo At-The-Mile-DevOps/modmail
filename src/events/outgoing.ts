@@ -15,56 +15,84 @@ import useSnippetFlow from "../handlers/useSnippet";
 import claimFlow from "../handlers/claim";
 import unclaimFlow from "../handlers/unclaim";
 
+/**
+ * The core driver for all staff functionality. Handles all ticket channel commands.
+ * Use functional flows when adding new commands to keep files minimal in size.
+ * @author Tyler
+ * @version 0.1
+ * @since 0.1.0
+ */
 module.exports = {
 	name: Events.MessageCreate,
 	once: false,
 	async execute(message: Message) {
 		const user = await ModMailPrisma.GET.getUserPermit(message.author.id)
 		const initialMsg = message.content.split(" ")[0]
+		
 		if (!initialMsg.startsWith(settings.prefix)) return
+		
 		if (message.author.bot) return
+		
 		if (user < Permit.EARLY_ACCESS_STAFF) return await message.reply({ content: "You currently do not have permission to access this ModMail feature." })
+		
 		const command = message.content.split(" ")[ 0 ].slice(settings.prefix.length)
+		
 		switch (command) {
+			
 			case "r":
 			case "reply": {
 				return await staffReplyFlow(message)
 			}
+			
 			case "ar":
 			case "anonreply": {
+				
 				if (user < Permit.HR) return await message.reply("Only HR and above can use anonymous replies!")
+				
 				return await anonStaffReplyFlow(message)
 			}
+			
 			case "contact": {
 				return await staffContactFlow(message)
 			}
+			
 			case "close": {
 				return await ticketCloseFlow(message)
 			}
+			
 			case "categories": {
 				return await categoryFlow(message)
 			}
+			
 			case "edit": {
 				return await staffEditFlow(message)
 			}
+			
 			case "snippets": {
 				return await snippetFlow(message)
 			}
+			
 			case "transfer": {
 				return await transferFlow(message)
 			}
+			
 			case "add": {
 				return await staffAddFlow(message, "add")
 			}
+			
 			case "remove": {
 				return await staffAddFlow(message, "remove")
 			}
+			
 			case "claim": {
 				return await claimFlow(message)
 			}
+			
 			case "unclaim": {
 				return await unclaimFlow(message)
 			}
+			
+			// Triggers for snippets
 			default: {
 				return await useSnippetFlow(message, command)
 			}

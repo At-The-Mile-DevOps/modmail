@@ -1,5 +1,8 @@
 import { EventEmitter } from "node:events"
 import eventLogger from "./eventLogger"
+
+// Custom EventEmitter extension for tracking desired logs.
+
 class CustomEmitter extends EventEmitter {}
 
 const LogEmitter = new CustomEmitter()
