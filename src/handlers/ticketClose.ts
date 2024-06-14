@@ -105,8 +105,9 @@ async function closeFunction(message: Message, args: string) {
 		.setDescription(`Close Reason: ${args}\n\nWe hope your experience using ModMail was as enjoyable as possible, and we hope your questions or concerns have been addressed. Attached below is your transcript. Please don't hesitate to contact us with any issues.`)
 		.setColor(0x770202)
 		.setFooter({ text: "At The Mile ModMail" })
+	const transcriptChannel = (message.channel as TextChannel).parent!.children.cache.first() as TextChannel
 	await (await client.client.users.fetch(user)).send({ files: [ transcriptAttachment ], embeds: [ embed ] })
-	await (await (await client.client.guilds.fetch(settings.GUILD_ID)).channels.fetch(settings.transcript_channel) as TextChannel).send({ files: [ staffTranscriptAttachment ], content: `Transcript from ModMail thread with user ${user} (<@${user}>). Reason for closure: ${args}` })
+	await transcriptChannel.send({ files: [ staffTranscriptAttachment ], content: `Transcript from ModMail thread with user ${user} (<@${user}>). Reason for closure: ${args}` })
 	await (await (await client.client.guilds.fetch(settings.GUILD_ID)).channels.fetch(message.channel.id))?.delete(`Ticket closed.`)
 	await ModMailPrisma.DELETE.removeTicket(user)
 	return [true, user, message.author.id]
