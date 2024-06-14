@@ -46,7 +46,9 @@ module.exports = {
 			
 			case "ar":
 			case "anonreply": {
+				
 				if (user < Permit.HR) return await message.reply("Only HR and above can use anonymous replies!")
+				
 				return await anonStaffReplyFlow(message)
 			}
 			
