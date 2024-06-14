@@ -10,27 +10,31 @@ export default async function snippetFlow(message: Message) {
             const name = message.content.split(" ")[2]
             let val = message.content.split(" ").slice(3).join(" ")
             if (reservedSnippetNames.includes(name)) return await message.reply("This name is reserved for something else. Please use a different name.")
-            const status = await ModMailPrisma.POST.addNewSnippet(name, val)
-            if (status === false) return message.reply({ content: "A snippet with that name already exists. Please use the edit command if you want to change the value." })
 
             let additionalDesc = ""
             let userSubMatches = val.match(/{u}/g)
             if (userSubMatches) {
-                additionalDesc += `This snippet has **${userSubMatches.length}** user mention substitutions.\n`
+                if (userSubMatches.length > 1) return await message.reply("You can only use one user replacement per snippet.")
+                additionalDesc += `This snippet has a user mention substitution.\n`
                 val = val.replace("{u}", `<@${settings.CLIENT_ID}>`)
             }
 
             let authorSubMatches = val.match(/{a}/g)
             if (authorSubMatches) {
-                additionalDesc += `This snipppt has **${authorSubMatches.length}** author mention substitutions.\n`
+                if (authorSubMatches.length > 1) return await message.reply("You can only use one author replacement per snippet.")
+                additionalDesc += `This snipppt has an author mention substitution.\n`
                 val = val.replace("{a}", `<@${message.author.id}>`)
             }
 
             let reasonSubMatches = val.match(/{r}/g)
             if (reasonSubMatches) {
-                additionalDesc += `This snippet has **${reasonSubMatches.length}** reason substitutions.\n`
+                if (reasonSubMatches.length > 1) return await message.reply("You can only use one reason replacement per snippet.")
+                additionalDesc += `This snippet has a reason substitution.\n`
                 val = val.replace("{r}", `This is a sample reason.`)
             }
+
+            const status = await ModMailPrisma.POST.addNewSnippet(name, val)
+            if (status === false) return message.reply({ content: "A snippet with that name already exists. Please use the edit command if you want to change the value." })
 
             additionalDesc += "\n\n"
             const embed = new EmbedBuilder()
