@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@prisma/client": "5.14.0",
+    "@types/uuid": "^9.0.8",
     "cat-loggr": "^1.2.2",
     "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
     "prisma": "^5.14.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "uuid": "^10.0.0"
   }
 }

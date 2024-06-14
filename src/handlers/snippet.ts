@@ -12,6 +12,7 @@ export default async function snippetFlow(message: Message) {
         case "new": {
             const name = message.content.split(" ")[2]
             let val = message.content.split(" ").slice(3).join(" ")
+            let oldVal = val
             if (reservedSnippetNames.includes(name)) return await message.reply("This name is reserved for something else. Please use a different name.")
 
             let additionalDesc = ""
@@ -36,7 +37,7 @@ export default async function snippetFlow(message: Message) {
                 val = val.replace("{r}", `This is a sample reason.`)
             }
 
-            const status = await ModMailPrisma.POST.addNewSnippet(name, val)
+            const status = await ModMailPrisma.POST.addNewSnippet(name, oldVal)
             if (status === false) return message.reply({ content: "A snippet with that name already exists. Please use the edit command if you want to change the value." })
 
             additionalDesc += "\n\n"
@@ -53,6 +54,7 @@ export default async function snippetFlow(message: Message) {
         case "edit": {
             const name = message.content.split(" ")[2]
             let val = message.content.split(" ").slice(3).join(" ")
+            let oldVal = val
             const snippet = await ModMailPrisma.GET.getSnippetByName(name)
             if (!snippet) return await message.reply("This doesn't seem to be a snippet.")
 
@@ -78,7 +80,7 @@ export default async function snippetFlow(message: Message) {
                 val = val.replace("{r}", `This is a sample reason.`)
             }
 
-            await ModMailPrisma.PATCH.updateSnippetValue(name, val)
+            await ModMailPrisma.PATCH.updateSnippetValue(name, oldVal)
 
             const embed = new EmbedBuilder()
                 .setTitle(`Snippet Edited`)

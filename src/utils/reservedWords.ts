@@ -12,7 +12,9 @@ const reservedSnippetNames = [
     "new",
     "preview",
     "list",
-    "add"
+    "add",
+    "warn",
+    "bl"
 ]
 
 export default reservedSnippetNames
