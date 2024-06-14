@@ -132,7 +132,7 @@ export default async function snippetFlow(message: Message) {
                     .setTitle("Available Snippets")
                     .setColor(0x770202)
                     .setFooter({ text: "At The Mile ModMail" })
-                    .setDescription(`To run a snippet in a ticket, run \`m![name]\`.\nTo preview a snippet, run \`m!snippets [name]\`.\n\n${snippets.join("\n")}`)
+                    .setDescription(`To run a snippet in a ticket, run \`${settings.prefix}[name]\`.\nTo preview a snippet, run \`${settings.prefix}snippets [name]\`.\n\n${snippets.join("\n")}`)
 
                 return await message.reply({
                     embeds: [ embed ]
@@ -142,7 +142,7 @@ export default async function snippetFlow(message: Message) {
                 if (!snippet) return await message.reply("This doesn't seem to be a snippet.")
                 
                 const embed = new EmbedBuilder()
-                    .setTitle(`Snippet m!${snippet.name}`)
+                    .setTitle(`Snippet ${settings.prefix}${snippet.name}`)
                     .setColor(0x770202)
                     .setFooter({ text: "At The Mile ModMail" })
                     .setDescription(snippet.val)
