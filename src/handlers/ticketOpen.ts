@@ -41,6 +41,7 @@ export default async function ticketOpenFlow(message: Message) {
 			}
 			await ModMailPrisma.POST.createNewSequencedMessage(message.author.id, message.author.id, m.proxyURL, `User attached image with the following proxy URL - ${m.proxyURL}.`, m.id, imgMessage.id, false, message.author.username)
 		})
+	await message.react("✅")
 	const embed = new EmbedBuilder()
 		.setTitle("New ModMail Ticket")
 		.setDescription(`Your ticket has been created! Please wait while a member of the appropriate department gets back to you.`)
