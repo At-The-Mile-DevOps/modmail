@@ -19,7 +19,7 @@ export default async function ticketOpenFlow(message: Message) {
 		const pending = await ModMailPrisma.GET.getCategoryByName("pending") as string // always defined by setup procedures
 		const category = await guild.channels.fetch(pending) as CategoryChannel
 		const newChannel = await category.children.create({
-			name: `pending-${message.author.username}`,
+			name: `${message.author.username}`,
 			topic: `ModMail conversation with ID ${message.author.id} | Claimed by no one.`
 		})
 		const sentMessage = await newChannel.send({ embeds: [ firstEmbed, introEmbed ] })

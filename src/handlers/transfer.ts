@@ -21,5 +21,4 @@ export default async function transferFlow(message: Message) {
 	const staffSentMessage = await message.channel.send({ embeds: [ embed ] })
 	await ModMailPrisma.POST.createNewSequencedMessage(user, message.author.id, message.url, "Ticket Transfer Started", userSentMessage.id, staffSentMessage.id, true, "At The Mile ModMail")
 	await (message.channel as TextChannel).setParent(categories[0].channelId)
-	await (message.channel as TextChannel).setName(`${categories[0].name}-${(message.channel as TextChannel).name.split("-")[ 1 ]}`)
 }

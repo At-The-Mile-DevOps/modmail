@@ -25,7 +25,7 @@ export default async function staffContactFlow(message: Message) {
 		message.reply({ content: "This user already has an open ticket! Contact them there." })
 	} else {
 		const channel = await (await client.client.guilds.fetch(settings.GUILD_ID)).channels.create({
-			name: `pending-${resolved.username}`,
+			name: `${resolved.username}`,
 			topic: `ModMail conversation with ID ${user} | Claimed by ${message.author.displayName}.`,
 			parent: `${await ModMailPrisma.GET.getCategoryByName('pending')}`
 		})
