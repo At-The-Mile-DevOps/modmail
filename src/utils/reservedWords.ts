@@ -11,7 +11,8 @@ const reservedSnippetNames = [
     "transfer",
     "new",
     "preview",
-    "list"
+    "list",
+    "add"
 ]
 
 export default reservedSnippetNames
