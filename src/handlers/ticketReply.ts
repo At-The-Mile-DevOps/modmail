@@ -42,4 +42,5 @@ export default async function ticketReplyFlow(message: Message, channel: ModMail
 		})
 		await ModMailPrisma.POST.createNewSequencedMessage(message.author.id, message.author.id, message.url, message.content, message.id, staffMsg.id, false, message.author.username)
 	}
+	return await message.react("✅")
 }
