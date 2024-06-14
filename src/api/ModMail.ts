@@ -145,6 +145,16 @@ export default class ModMailPrisma {
 				}
 			})
 		}
+
+		public static async checkMarkedForDeletion(discordId: string): Promise<string | null> {
+			const ticket = await prisma.modMailStatus.findFirst({
+				where: {
+					discordId
+				}
+			})
+			if (!ticket) return null
+			else return ticket.closeId
+		}
 	}
 	public static POST = class {
 		public static async createNewModmailThread(discordId: string, channel: string, claimedBy?: string) {
@@ -280,6 +290,28 @@ export default class ModMailPrisma {
 					}
 				});
 			}
+		}
+
+		public static async markForDeletion(discordId: string, id: string) {
+			return prisma.modMailStatus.update({
+				where: {
+					discordId
+				},
+				data: {
+					closeId: id
+				}
+			})
+		}
+
+		public static async cancelDeletion(discordId: string) {
+			return prisma.modMailStatus.update({
+				where: {
+					discordId
+				},
+				data: {
+					closeId: null
+				}
+			})
 		}
 	}
 
