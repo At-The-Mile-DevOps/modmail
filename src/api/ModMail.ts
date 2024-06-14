@@ -357,6 +357,29 @@ export default class ModMailPrisma {
 				}
 			})
 		}
+
+
+		public static async addClaimUser(userDiscordId: string, claimDiscordId: string) {
+			return prisma.modMailStatus.update({
+				where: {
+					discordId: userDiscordId
+				},
+				data: {
+					claimedBy: claimDiscordId
+				}
+			})
+		}
+
+		public static async removeClaimUser(userDiscordId: string) {
+			return prisma.modMailStatus.update({
+				where: {
+					discordId: userDiscordId
+				},
+				data: {
+					claimedBy: null
+				}
+			})
+		}
 	}
 
 	public static DELETE = class {

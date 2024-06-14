@@ -5,6 +5,8 @@ const reservedSnippetNames = [
     "anonreply",
     "contact",
     "close",
+    "claim",
+    "unclaim",
     "categories",
     "edit",
     "snippets",
