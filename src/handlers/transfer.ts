@@ -15,7 +15,11 @@ export default async function transferFlow(message: Message) {
 	const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
 	if (!user) return message.reply({ content: "This command can only be used in a ticket channel." })
 	
-	const args = message.content.split(" ")[ 1 ].toLowerCase()
+	const input = message.content.split(" ")[ 1 ]
+
+	if (!input) return await message.reply("You must provide a category for transfer.")
+
+	const args = input.toLowerCase()
 	
 	const categories = await ModMailPrisma.GET.getCategoryBySearch(args)
 	
