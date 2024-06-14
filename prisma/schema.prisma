@@ -65,3 +65,13 @@ model PendingMessages {
   discordId String @id
   content   String
 }
+
+model Warnings {
+  uuid      String @id
+  discordId String
+  reason    String
+}
+
+model BannedUsers {
+  discordId String @id
+}

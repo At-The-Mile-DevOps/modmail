@@ -1,6 +1,6 @@
 import client, { prisma } from ".."
 import {Permit} from "../@types/types";
-
+import { v4 as uuidv4 } from "uuid"
 export default class ModMailPrisma {
 	public static GET = class {
 		public static async getUserTicketStatus(discordId: string) {
@@ -234,6 +234,39 @@ export default class ModMailPrisma {
 					data: {
 						name,
 						val
+					}
+				})
+			} catch (e: any) {
+				return false
+			}
+		}
+
+		public static async addNewWarning(discordId: string, reason: string) {
+			const id = uuidv4()
+			await prisma.warnings.create({
+				data: {
+					uuid: id,
+					discordId,
+					reason
+				}
+			})
+			const count = await prisma.warnings.count({
+				where: {
+					discordId
+				}
+			})
+
+			if (count < 3) return "warn"
+			else if (count === 3) return "7day"
+			else if (count === 4) return "14day"
+			else return "perm"
+		}
+
+		public static async addNewBan(discordId: string) {
+			try {
+				return await prisma.bannedUsers.create({
+					data: {
+						discordId
 					}
 				})
 			} catch (e: any) {
