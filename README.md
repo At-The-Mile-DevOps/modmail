@@ -1,6 +1,7 @@
 # At The Mile ModMail
 
 More dev consistency rules to come, but for now:
+- Follow existing design trends, such as API comment patterns, indent/spacing/tabulation patterns, etc.
 - Always add doc comments to functions explaining their purpose.
 - Sign said doc comments with a @since (semver) and an @author tag.
 - All pulls are subject to Lead Developer review before merging - do not force merge.
