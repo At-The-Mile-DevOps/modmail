@@ -133,6 +133,18 @@ export default class ModMailPrisma {
 
 			return !(messages === null)
 		}
+
+		public static async getSnippetList() {
+			return prisma.snippets.findMany()
+		}
+
+		public static async getSnippetByName(query: string) {
+			return prisma.snippets.findFirst({
+				where: {
+					name: query
+				}
+			})
+		}
 	}
 	public static POST = class {
 		public static async createNewModmailThread(discordId: string, channel: string, claimedBy?: string) {

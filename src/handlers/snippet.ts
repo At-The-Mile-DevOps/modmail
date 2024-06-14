@@ -1,6 +1,7 @@
 import {EmbedBuilder, Message} from "discord.js";
 import ModMailPrisma from "../api/ModMail";
 import settings from "../settings.json"
+import reservedSnippetNames from "../utils/reservedWords";
 
 export default async function snippetFlow(message: Message) {
     const args = message.content.split(" ")[1]
@@ -8,6 +9,7 @@ export default async function snippetFlow(message: Message) {
         case "new": {
             const name = message.content.split(" ")[2]
             let val = message.content.split(" ").slice(3).join(" ")
+            if (reservedSnippetNames.includes(name)) return await message.reply("This name is reserved for something else. Please use a different name.")
             const status = await ModMailPrisma.POST.addNewSnippet(name, val)
             if (status === false) return message.reply({ content: "A snippet with that name already exists. Please use the edit command if you want to change the value." })
 
@@ -37,9 +39,35 @@ export default async function snippetFlow(message: Message) {
                 .setFooter({ text: `At The Mile ModMail | To edit, use ${settings.prefix}snippets edit ${name}.` })
                 .setDescription(`${additionalDesc}Sample Output:\n${val}`)
 
-            await message.reply({
+            return await message.reply({
                 embeds: [embed]
             })
+        }
+        default: {
+            if (!args) {
+                const snippets = (await ModMailPrisma.GET.getSnippetList()).map(e => e.name)
+                const embed = new EmbedBuilder()
+                    .setTitle("Available Snippets")
+                    .setColor(0x770202)
+                    .setFooter({ text: "At The Mile ModMail" })
+                    .setDescription(`To run a snippet in a ticket, run \`m![name]\`.\nTo preview a snippet, run \`m!snippets [name]\`.\n\n${snippets.join("\n")}`)
+
+                return await message.reply({
+                    embeds: [embed]
+                })
+            } else {
+                const snippet = await ModMailPrisma.GET.getSnippetByName(args)
+                if (!snippet) return await message.reply("This doesn't seem to be a snippet.")
+                const embed = new EmbedBuilder()
+                    .setTitle(`Snippet m!${snippet.name}`)
+                    .setColor(0x770202)
+                    .setFooter({ text: "At The Mile ModMail" })
+                    .setDescription(snippet.val)
+
+                return await message.reply({
+                    embeds: [embed]
+                })
+            }
         }
     }
 }
