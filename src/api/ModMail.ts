@@ -303,6 +303,17 @@ export default class ModMailPrisma {
 			})
 		}
 
+		public static async updateSnippetValue(name: string, val: string) {
+			return prisma.snippets.update({
+				where: {
+					name
+				},
+				data: {
+					val
+				}
+			})
+		}
+
 		public static async cancelDeletion(discordId: string) {
 			return prisma.modMailStatus.update({
 				where: {
@@ -326,6 +337,14 @@ export default class ModMailPrisma {
 			await prisma.modMailStatus.deleteMany({
 				where: {
 					discordId
+				}
+			})
+		}
+
+		public static async removeSnippet(name: string) {
+			return prisma.snippets.delete({
+				where: {
+					name
 				}
 			})
 		}
