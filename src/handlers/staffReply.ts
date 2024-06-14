@@ -4,9 +4,23 @@ import client from ".."
 
 export default async function staffReplyFlow(message: Message) {
 	const user = await ModMailPrisma.GET.getChannelTicketUser(message.channel.id)
+	if (!user) return
+	const status = await ModMailPrisma.GET.checkMarkedForDeletion(user)
+	if (status) {
+		clearTimeout(status)
+		const embed = new EmbedBuilder()
+			.setTitle("Close Cancelled")
+			.setDescription("Scheduled close cancelled.")
+			.setColor(0x770202)
+			.setFooter({ text: "At The Mile ModMail" })
+
+		await message.reply({
+			embeds: [embed]
+		})
+		await ModMailPrisma.PATCH.cancelDeletion(user)
+	}
 	const content = message.content.split(" ")
 	content.shift()
-	if (!user) return
 	const staffMember = message.member!
 	const embed = new EmbedBuilder()
 		.setDescription(content.join(" "))

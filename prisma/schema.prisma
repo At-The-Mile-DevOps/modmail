@@ -24,6 +24,7 @@ model ModMailStatus {
   claimed   Boolean
   openTime  DateTime @default(now())
   claimedBy String?
+  closeId   String?
 }
 
 model ModMailMessage {
