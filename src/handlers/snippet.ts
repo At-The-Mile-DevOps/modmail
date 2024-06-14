@@ -15,13 +15,12 @@ import catLogger from "../utils/catloggr";
 export default async function snippetFlow(message: Message) {
    
     const args = message.content.split(" ")[ 1 ]
-   
-    const permit = await ModMailPrisma.GET.getUserPermit(message.author.id)
-    if (permit < Permit.HRM) return await message.reply("Only HRM+ can create, edit, and delete snippets.")
     
     switch (args) {
         
         case "new": {
+            const permit = await ModMailPrisma.GET.getUserPermit(message.author.id)
+            if (permit < Permit.HRM) return await message.reply("Only HRM+ can create, edit, and delete snippets.")
             const name = message.content.split(" ")[ 2 ]
             let val = message.content.split(" ").slice(3).join(" ")
            
@@ -73,6 +72,8 @@ export default async function snippetFlow(message: Message) {
         }
         
         case "edit": {
+            const permit = await ModMailPrisma.GET.getUserPermit(message.author.id)
+            if (permit < Permit.HRM) return await message.reply("Only HRM+ can create, edit, and delete snippets.")
             const name = message.content.split(" ")[ 2 ]
             let val = message.content.split(" ").slice(3).join(" ")
             
@@ -120,6 +121,8 @@ export default async function snippetFlow(message: Message) {
         }
         
         case "delete": {
+            const permit = await ModMailPrisma.GET.getUserPermit(message.author.id)
+            if (permit < Permit.HRM) return await message.reply("Only HRM+ can create, edit, and delete snippets.")
             const name = message.content.split(" ")[ 2 ]
             
             const snippet = await ModMailPrisma.GET.getSnippetByName(name)
