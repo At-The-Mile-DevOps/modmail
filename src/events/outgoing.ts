@@ -10,6 +10,7 @@ import transferFlow from "../handlers/transfer";
 import snippetFlow from "../handlers/snippet";
 import {Permit} from "../@types/types";
 import staffEditFlow from "../handlers/staffEdit";
+import staffAddFlow from "../handlers/staffAdd";
 
 module.exports = {
 	name: Events.MessageCreate,
@@ -48,6 +49,12 @@ module.exports = {
 			}
 			case "transfer": {
 				return await transferFlow(message)
+			}
+			case "add": {
+				return await staffAddFlow(message, "add")
+			}
+			case "remove": {
+				return await staffAddFlow(message, "remove")
 			}
 		}
 	}
