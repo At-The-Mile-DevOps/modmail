@@ -1,6 +1,7 @@
 import { EmbedBuilder, Message } from "discord.js"
 import ModMailPrisma from "../api/ModMail"
 import client from ".."
+import catLogger from "../utils/catloggr"
 
 /**
  * Handles all staff normal replies.
@@ -26,6 +27,9 @@ export default async function staffReplyFlow(message: Message) {
 		await message.reply({
 			embeds: [ embed ]
 		})
+
+		catLogger.events("Ticket Scheduled Close Cancelled")
+		
 		await ModMailPrisma.PATCH.resetDeletion(user)
 	}
 	
@@ -46,6 +50,8 @@ export default async function staffReplyFlow(message: Message) {
 	await message.delete()
 	
 	const staffSentMessage = await message.channel.send({ embeds: [ embed ] })
+
+	catLogger.events("Staff Reply Flow Concluded - Reply Sent")
 
 	return await ModMailPrisma.POST.newSequencedMessage(user, message.author.id, message.url, content.join(" "), userSentMessage.id, staffSentMessage.id, false, staffMember.displayName, true)
 }

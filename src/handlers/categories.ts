@@ -1,5 +1,6 @@
 import { EmbedBuilder, Message } from "discord.js"
 import ModMailPrisma from "../api/ModMail"
+import catLogger from "../utils/catloggr"
 
 /**
  * Handles all category creation, listing, editing, and removal.
@@ -21,8 +22,12 @@ export default async function categoryFlow(message: Message) {
 				.setDescription(categories.join("\n"))
 				.setColor(0x770202)
 				.setFooter({ text: "At The Mile ModMail" })
+
+			catLogger.events("Staff Category Flow Concluded - Category List Generated")
 			
 			return await message.reply({ embeds: [ embed ] })
+
+			
 		}
 		
 		case "create": {
@@ -40,6 +45,8 @@ export default async function categoryFlow(message: Message) {
 				.setDescription(`Name: **${name.join("-").toLowerCase()}**\nID: \`${id}\``)
 				.setColor(0x770202)
 				.setFooter({ text: "At The Mile ModMail" })
+
+			catLogger.events("Staff Category Flow Concluded - Category Created")
 			
 			return await message.reply({ embeds: [ embed ] })
 		}

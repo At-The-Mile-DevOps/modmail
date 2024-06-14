@@ -3,6 +3,7 @@ import ModMailPrisma from "../api/ModMail"
 import client from ".."
 import settings from "../settings.json"
 import newMessageEmbed from "./newMessageEmbed"
+import catLogger from "../utils/catloggr"
 
 /**
  * Handles all ticket openings.
@@ -66,6 +67,8 @@ export default async function ticketOpenFlow(message: Message) {
 		.setDescription(`Your ticket has been created! Please wait while a member of the appropriate department gets back to you.`)
 		.setColor(0x770202)
 		.setFooter({ text: "At The Mile ModMail" })
+
+	catLogger.events("User Ticket Open Flow Concluded - Ticket Opened")
 	
 	return message.reply({
 		embeds: [ embed ]

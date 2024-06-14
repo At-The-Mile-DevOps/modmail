@@ -2,6 +2,7 @@ import { ChannelType, EmbedBuilder, Events, Message, PartialMessage, TextBasedCh
 import ModMailPrisma from "../api/ModMail";
 import client from "../index";
 import settings from "../settings.json"
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles all message edit events in a DM - instances where the user wishes to update their message seamlessly.
@@ -35,6 +36,8 @@ module.exports = {
         
         const messageEdit = await ModMailPrisma.PATCH.editMessageContent(authorId, newContent, oldMessageId)
         if (!(await ModMailPrisma.GET.isMessageValid(authorId, oldMessageId)) || !messageEdit) return
+
+        catLogger.events("User Message Edit Flow Started")
         
         const guild = await client.client.guilds.fetch(settings.GUILD_ID)
         const channel = await guild.channels.fetch(modMailStatus.channel!) as TextBasedChannel

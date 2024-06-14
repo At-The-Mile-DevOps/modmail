@@ -1,6 +1,7 @@
 import { EmbedBuilder, Message } from "discord.js";
 import ModMailPrisma from "../api/ModMail";
 import client from "..";
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles all instances of attempted use of snippets.
@@ -66,6 +67,8 @@ export default async function useSnippetFlow(message: Message, command: string) 
 	await message.delete()
 	
 	const staffSentMessage = await message.channel.send({ embeds: [ embed ] })
+
+	catLogger.events("Staff Snippet Flow Concluded - Snippet Reply Sent")
 
 	return await ModMailPrisma.POST.newSequencedMessage(user, message.author.id, message.url, content.join(" "), userSentMessage.id, staffSentMessage.id, false, staffMember.displayName, true)
 }

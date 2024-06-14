@@ -1,6 +1,7 @@
 import { Message, TextChannel } from "discord.js";
 import ModMailPrisma from "../api/ModMail";
 import settings from "../settings.json"
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles all ticket unclaims.
@@ -21,6 +22,8 @@ export default async function unclaimFlow(message: Message) {
 	await ModMailPrisma.PATCH.setClaimUser(status, message.author.id)
 	
 	await (message.channel as TextChannel).setTopic(`${(message.channel as TextChannel).topic!.split(" | ")[ 0 ]} | Claimed by no one.`)
+
+	catLogger.events("Staff Unclaim Flow Concluded - Ticket Unclaimed")
 	
 	return message.reply(`Unclaimed ticket. To claim, use ${settings.prefix}claim.`)
 }

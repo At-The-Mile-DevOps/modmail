@@ -1,9 +1,9 @@
 import { ChannelType, Events, Message } from "discord.js";
 import ModMailPrisma from "../api/ModMail";
-import LogEmitter from "../handlers/LogEmitter";
 import ticketOpenFlow from "../handlers/ticketOpen";
 import ticketReplyFlow from "../handlers/ticketReply";
 import { Permit } from "../@types/types";
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles all **incoming** user queries.
@@ -28,13 +28,13 @@ module.exports = {
 				if (permit < Permit.EARLY_ACCESS_STAFF) return await message.reply({ content: "You currently do not have permission to access this ModMail feature." })
 				const channel = await ModMailPrisma.GET.getUserTicketObject(message.author.id)
 				if (!channel || !channel.channel) {
-
+					catLogger.events("Ticket Open Flow Started")
 					await ticketOpenFlow(message)
 				} else {
+					catLogger.events("Ticket Reply Flow Started")
 					await ticketReplyFlow(message, channel)
 				}
 
-				return LogEmitter.emit('userMessage', message.author.id)
 			}
 
 			// Handles hidden messages.
@@ -42,6 +42,7 @@ module.exports = {
 				const status = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
 				if (!status) return
 				else {
+					catLogger.events("Staff Hidden Message Flow Started")
 					return await ModMailPrisma.POST.newSequencedMessage(status, message.author.id, message.url, message.content, '0', message.id, false, message.author.displayName, true, true)
 				}
 			}

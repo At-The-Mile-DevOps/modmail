@@ -1,6 +1,7 @@
 import { Message, TextChannel } from "discord.js";
 import ModMailPrisma from "../api/ModMail";
 import settings from "../settings.json"
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles all **claims** (not unclaims!) of a ticket.
@@ -23,6 +24,8 @@ export default async function claimFlow(message: Message) {
 	await ModMailPrisma.PATCH.setClaimUser(status, message.author.id)
 	
 	await (message.channel as TextChannel).setTopic(`${(message.channel as TextChannel).topic!.split(" | ")[ 0 ]} | Claimed by ${message.author.displayName}.`)
+
+	catLogger.events("Staff Claim Flow Concluded - User Claim Swapped")
 	
 	return message.reply(`Claimed ticket. To unclaim, use ${settings.prefix}unclaim.`)
 }

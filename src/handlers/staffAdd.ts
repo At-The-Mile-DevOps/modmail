@@ -2,6 +2,7 @@ import {Message, TextChannel} from "discord.js";
 import client from "../index";
 import ModMailPrisma from "../api/ModMail";
 import {Permit} from "../@types/types";
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles staff additions and removal from a ticket.
@@ -27,6 +28,8 @@ export default async function staffAddFlow(message: Message, mode: "add" | "remo
                 SendMessages: true
             })
             
+            catLogger.events("Staff Add User Flow Concluded - User Added To Ticket")
+            
             return await message.reply(`Added <@${targetId}> to the ticket.`)
         
         } catch (e: any) {
@@ -42,6 +45,9 @@ export default async function staffAddFlow(message: Message, mode: "add" | "remo
                 ViewChannel: false,
                 SendMessages: false
             })
+
+            catLogger.events("Staff Remove User Flow Concluded - User Removed From Ticket")
+
             return await message.reply(`Removed <@${targetId}> from the ticket.`)
         
         } catch (e: any) {

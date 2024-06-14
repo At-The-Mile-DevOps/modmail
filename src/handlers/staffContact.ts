@@ -3,6 +3,7 @@ import client from "..";
 import settings from "../settings.json"
 import ModMailPrisma from "../api/ModMail";
 import newMessageEmbed from "./newMessageEmbed";
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles all outgoing messages from the contact command.
@@ -60,6 +61,8 @@ export default async function staffContactFlow(message: Message) {
 		const staffMsg = await channel.send({ content: "The following embed was sent to the user.", embeds: [ embed ] })
 		
 		await ModMailPrisma.POST.newSequencedMessage(user, message.author.id, staffMsg.url, "Contact ticket instantiated by member of staff.", userMsg.id, staffMsg.id, true, "At The Mile ModMail")
+
+		catLogger.events("Staff Contact Flow Concluded - User Contacted")
 		
 		message.reply({ content: `Ticket created! See <#${channel.id}> for your ticket.` })
 	}

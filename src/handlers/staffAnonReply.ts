@@ -1,6 +1,7 @@
 import { EmbedBuilder, Message } from "discord.js";
 import ModMailPrisma from "../api/ModMail";
 import client from "..";
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles all anonymous staff replies.
@@ -27,6 +28,8 @@ export default async function anonStaffReplyFlow(message: Message) {
 			embeds: [ embed ]
 		})
 		
+		catLogger.events("Ticket Scheduled Close Cancelled")
+
 		await ModMailPrisma.PATCH.resetDeletion(user)
 	}
 	
@@ -47,6 +50,8 @@ export default async function anonStaffReplyFlow(message: Message) {
 	await message.delete()
 	
 	const staffSentMessage = await message.channel.send({ embeds: [ embed ] })
+
+	catLogger.events("Staff Anon Reply Flow Concluded - Anon Reply Sent")
 
 	return await ModMailPrisma.POST.newSequencedMessage(user, message.author.id, message.url, content.join(" "), userSentMessage.id, staffSentMessage.id, true, staffMember.displayName, true)
 }

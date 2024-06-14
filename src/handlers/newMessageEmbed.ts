@@ -1,4 +1,5 @@
 import { EmbedBuilder, GuildMember } from "discord.js";
+import catLogger from "../utils/catloggr";
 
 /**
  * Easy way to create introductory embeds for new staff ticket channels.
@@ -17,5 +18,6 @@ export default async function newMessageEmbed(guildUser: GuildMember) {
 		.setColor(0x770202)
 		.setFooter({ text: "At The Mile ModMail" })
 
+	catLogger.events("User New Message Embed Created")
 	return embed
 }

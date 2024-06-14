@@ -3,6 +3,7 @@ import { EmbedBuilder, Message, TextChannel } from "discord.js";
 import client from "..";
 import settings from "../settings.json"
 import ModMailPrisma from "../api/ModMail";
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles all ticket replies from the user.
@@ -61,6 +62,8 @@ export default async function ticketReplyFlow(message: Message, channel: ModMail
 		
 		await ModMailPrisma.POST.newSequencedMessage(message.author.id, message.author.id, message.url, message.content, message.id, staffMsg.id, false, message.author.username)
 	}
+
+	catLogger.events("User Ticket Open Flow Concluded - Ticket Opened")
 
 	return await message.react("✅")
 }

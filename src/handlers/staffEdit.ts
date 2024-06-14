@@ -1,6 +1,7 @@
 import { EmbedBuilder, Emoji, Message, TextBasedChannel } from "discord.js";
 import ModMailPrisma from "../api/ModMail";
 import client from "../index";
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles all staff message edits.
@@ -48,6 +49,8 @@ export default async function staffEditFlow(message: Message) {
         await dmMessage.edit({
             embeds: [ newUserEmbed ]
         })
+
+        catLogger.events("Staff Edit Reply Flow Concluded - Message Edited")
         
         return await message.react("✅")
     

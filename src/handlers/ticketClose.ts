@@ -2,6 +2,7 @@ import { AttachmentBuilder, EmbedBuilder, Message, TextChannel, time } from "dis
 import ModMailPrisma from "../api/ModMail"
 import client from ".."
 import settings from "../settings.json"
+import catLogger from "../utils/catloggr"
 
 /**
  * Handles all standard and timed ticket closures with or without a provided reason.
@@ -47,6 +48,8 @@ export default async function ticketCloseFlow(message: Message) {
 						embeds: [ embed ]
 					})
 					
+					catLogger.events("Ticket Scheduled Close Cancelled")
+
 					return await ModMailPrisma.PATCH.resetDeletion(user)
 				}
 			}
@@ -107,6 +110,8 @@ export default async function ticketCloseFlow(message: Message) {
 					await closeFunction(message, args.join(" "))
 				}, totalAmount)
 				
+				catLogger.events("Staff Ticket Close Flow Concluded - Ticket Close Scheduled")
+
 				return await ModMailPrisma.PATCH.setForDeletion(user, `${timeoutId as any}`)
 			
 			} else {
@@ -160,6 +165,8 @@ async function closeFunction(message: Message, args: string) {
 	await (await (await client.client.guilds.fetch(settings.GUILD_ID)).channels.fetch(message.channel.id))?.delete(`Ticket closed.`)
 	
 	await ModMailPrisma.DELETE.deleteTicket(user)
+
+	catLogger.events("Staff Ticket Close Flow Concluded - Ticket Closed")
 	
 	return [ true, user, message.author.id ]
 }

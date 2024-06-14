@@ -3,6 +3,7 @@ import ModMailPrisma from "../api/ModMail";
 import settings from "../settings.json"
 import reservedSnippetNames from "../utils/reservedWords";
 import { Permit } from "../@types/types";
+import catLogger from "../utils/catloggr";
 
 /**
  * Handles the creation, editing, and deletion of snippets.
@@ -41,7 +42,7 @@ export default async function snippetFlow(message: Message) {
             
             if (authorSubMatches) {
                 if (authorSubMatches.length > 1) return await message.reply("You can only use one author replacement per snippet.")
-                additionalDesc += `This snipppt has an author mention substitution.\n`
+                additionalDesc += `This snippet has an author mention substitution.\n`
                 val = val.replace("{a}", `<@${message.author.id}>`)
             }
 
@@ -64,6 +65,8 @@ export default async function snippetFlow(message: Message) {
                 .setFooter({ text: `At The Mile ModMail | To edit, use ${settings.prefix}snippets edit ${name}.` })
                 .setDescription(`${additionalDesc}Sample Output:\n${val}`)
 
+            catLogger.events("Staff Snippet Flow Concluded - New Snippet Generated")
+            
             return await message.reply({
                 embeds: [ embed ]
             })
@@ -90,7 +93,7 @@ export default async function snippetFlow(message: Message) {
             let authorSubMatches = val.match(/{a}/g)
             if (authorSubMatches) {
                 if (authorSubMatches.length > 1) return await message.reply("You can only use one author replacement per snippet.")
-                additionalDesc += `This snipppt has an author mention substitution.\n`
+                additionalDesc += `This snippet has an author mention substitution.\n`
                 val = val.replace("{a}", `<@${message.author.id}>`)
             }
 
@@ -109,6 +112,8 @@ export default async function snippetFlow(message: Message) {
                 .setFooter({ text: `At The Mile ModMail | To edit, use ${settings.prefix}snippets edit ${name}.` })
                 .setDescription(`${additionalDesc}Sample Output:\n${val}`)
 
+            catLogger.events("Staff Snippet Flow Concluded - Snippet Edited")
+
             return await message.reply({
                 embeds: [ embed ]
             })
@@ -121,6 +126,8 @@ export default async function snippetFlow(message: Message) {
             if (!snippet) return await message.reply("This doesn't seem to be a snippet.")
             
             await ModMailPrisma.DELETE.deleteSnippet(name)
+
+            catLogger.events("Staff Snippet Flow Concluded - Snippet Deleted")
             
             return await message.reply("Snippet deleted.")
         }
@@ -134,6 +141,8 @@ export default async function snippetFlow(message: Message) {
                     .setFooter({ text: "At The Mile ModMail" })
                     .setDescription(`To run a snippet in a ticket, run \`${settings.prefix}[name]\`.\nTo preview a snippet, run \`${settings.prefix}snippets [name]\`.\n\n${snippets.join("\n")}`)
 
+                catLogger.events("Staff Snippet Flow Concluded - Snippet Info Menu Generated")
+
                 return await message.reply({
                     embeds: [ embed ]
                 })
@@ -146,6 +155,8 @@ export default async function snippetFlow(message: Message) {
                     .setColor(0x770202)
                     .setFooter({ text: "At The Mile ModMail" })
                     .setDescription(snippet.val)
+
+                catLogger.events("Staff Snippet Flow Concluded - Snippet Previewed")
 
                 return await message.reply({
                     embeds: [ embed ]

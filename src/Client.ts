@@ -3,7 +3,6 @@ import { ExtendedClient } from "./@types/types";
 import { ActivityType, Client, Collection, GatewayIntentBits, Partials, REST, Routes } from "discord.js";
 import fs from "fs"
 import catLogger from "./utils/catloggr";
-import LogEmitter from "./handlers/LogEmitter";
 
 /**
  * Class for the Discord.JS client instantiation of the bot.
@@ -97,7 +96,6 @@ export default class ModMailClient {
 					name: "with HR files",
 				});
 			}
-			LogEmitter.emit('init')
 		})
 	}
 

@@ -1,6 +1,7 @@
 import { EmbedBuilder, Message, TextChannel } from "discord.js"
 import ModMailPrisma from "../api/ModMail"
 import client from ".."
+import catLogger from "../utils/catloggr"
 
 /**
  * Handles all ticket category transfers.
@@ -40,4 +41,6 @@ export default async function transferFlow(message: Message) {
 	await ModMailPrisma.POST.newSequencedMessage(user, message.author.id, message.url, "Ticket Transfer Started", userSentMessage.id, staffSentMessage.id, true, "At The Mile ModMail")
 	
 	await (message.channel as TextChannel).setParent(categories[ 0 ].channelId)
+
+	catLogger.events("Staff Ticket Transfer Flow Concluded - Ticket Transferred")
 }
