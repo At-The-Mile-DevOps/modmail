@@ -16,7 +16,7 @@ export default async function categoryFlow(message: Message) {
 		case "create": {
 			const [ id, ...name ] = message.content.split(" ").slice(2)
 			try {
-				await ModMailPrisma.POST.addNewCategory(id, name.join("-").toLowerCase())
+				await ModMailPrisma.POST.newCategory(id, name.join("-").toLowerCase())
 			} catch (e: any) {
 				return message.reply("Could not add this category. Did you accidentally double up on an existing category's ID?")
 			}

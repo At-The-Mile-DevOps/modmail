@@ -6,7 +6,7 @@ import ModMailPrisma from "../api/ModMail";
 
 export default async function ticketReplyFlow(message: Message, channel: ModMailStatus) {
 	let claimUser = channel.claimedBy
-	const status = await ModMailPrisma.GET.checkMarkedForDeletion(message.author.id)
+	const status = await ModMailPrisma.GET.isMarkedForDeletion(message.author.id)
 	const channelResolvable = await ((await client.client.guilds.fetch(settings.GUILD_ID)).channels.fetch(channel.channel!)) as TextChannel
 	if (status) {
 		clearTimeout(status)
@@ -17,10 +17,10 @@ export default async function ticketReplyFlow(message: Message, channel: ModMail
 			.setFooter({ text: "At The Mile ModMail" })
 
 		await channelResolvable.send({
-			embeds: [embed]
+			embeds: [ embed ]
 		})
 
-		await ModMailPrisma.PATCH.cancelDeletion(message.author.id)
+		await ModMailPrisma.PATCH.resetDeletion(message.author.id)
 	}
 	const embed = new EmbedBuilder()
 		.setAuthor({
@@ -35,12 +35,12 @@ export default async function ticketReplyFlow(message: Message, channel: ModMail
 			content: `<@${claimUser}>`,
 			embeds: [ embed ]
 		})
-		await ModMailPrisma.POST.createNewSequencedMessage(message.author.id, message.author.id, message.url, message.content, message.id, staffMsg.id, false, message.author.username)
+		await ModMailPrisma.POST.newSequencedMessage(message.author.id, message.author.id, message.url, message.content, message.id, staffMsg.id, false, message.author.username)
 	} else {
 		const staffMsg = await channelResolvable.send({
 			embeds: [ embed ]
 		})
-		await ModMailPrisma.POST.createNewSequencedMessage(message.author.id, message.author.id, message.url, message.content, message.id, staffMsg.id, false, message.author.username)
+		await ModMailPrisma.POST.newSequencedMessage(message.author.id, message.author.id, message.url, message.content, message.id, staffMsg.id, false, message.author.username)
 	}
 	return await message.react("✅")
 }

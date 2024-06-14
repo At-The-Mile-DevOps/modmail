@@ -1,9 +1,9 @@
-import {ChannelType, Events, Message} from "discord.js";
+import { ChannelType, Events, Message } from "discord.js";
 import ModMailPrisma from "../api/ModMail";
 import LogEmitter from "../handlers/LogEmitter";
 import ticketOpenFlow from "../handlers/ticketOpen";
 import ticketReplyFlow from "../handlers/ticketReply";
-import {Permit} from "../@types/types";
+import { Permit } from "../@types/types";
 
 module.exports = {
 	name: Events.MessageCreate,
@@ -25,10 +25,10 @@ module.exports = {
 				return LogEmitter.emit('userMessage', message.author.id)
 			}
 			case ChannelType.GuildText: {
-				const status = await ModMailPrisma.GET.getChannelTicketUser(message.channel.id)
+				const status = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
 				if (!status) return
 				else {
-					return await ModMailPrisma.POST.createNewSequencedMessage(status, message.author.id, message.url, message.content, '0', message.id, false, message.author.displayName, true, true)
+					return await ModMailPrisma.POST.newSequencedMessage(status, message.author.id, message.url, message.content, '0', message.id, false, message.author.displayName, true, true)
 				}
 			}
 		}

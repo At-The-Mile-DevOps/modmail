@@ -3,7 +3,7 @@ import ModMailPrisma from "../api/ModMail"
 import client from ".."
 
 export default async function transferFlow(message: Message) {
-	const user = await ModMailPrisma.GET.getChannelTicketUser(message.channel.id)
+	const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
 	if (!user) return message.reply({ content: "This command can only be used in a ticket channel." })
 	const args = message.content.split(" ")[ 1 ].toLowerCase()
 	const categories = await ModMailPrisma.GET.getCategoryBySearch(args)
@@ -19,6 +19,6 @@ export default async function transferFlow(message: Message) {
 	const userSentMessage = await replyUser.send({ embeds: [ embed ] })
 	await message.delete()
 	const staffSentMessage = await message.channel.send({ embeds: [ embed ] })
-	await ModMailPrisma.POST.createNewSequencedMessage(user, message.author.id, message.url, "Ticket Transfer Started", userSentMessage.id, staffSentMessage.id, true, "At The Mile ModMail")
-	await (message.channel as TextChannel).setParent(categories[0].channelId)
+	await ModMailPrisma.POST.newSequencedMessage(user, message.author.id, message.url, "Ticket Transfer Started", userSentMessage.id, staffSentMessage.id, true, "At The Mile ModMail")
+	await (message.channel as TextChannel).setParent(categories[ 0 ].channelId)
 }

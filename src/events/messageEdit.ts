@@ -1,4 +1,4 @@
-import {ChannelType, EmbedBuilder, Events, Message, PartialMessage, TextBasedChannel} from "discord.js";
+import { ChannelType, EmbedBuilder, Events, Message, PartialMessage, TextBasedChannel } from "discord.js";
 import ModMailPrisma from "../api/ModMail";
 import client from "../index";
 import settings from "../settings.json"
@@ -20,8 +20,8 @@ module.exports = {
         const newContent = newMessage.content
         const modMailStatus = await ModMailPrisma.GET.getUserTicketObject(oldMessage.author.id)
         if (!modMailStatus) return
-        const messageEdit = await ModMailPrisma.PATCH.updateMessageContent(authorId, newContent, oldMessageId)
-        if (!(await ModMailPrisma.GET.checkIfMessageValid(authorId, oldMessageId)) || !messageEdit) return
+        const messageEdit = await ModMailPrisma.PATCH.editMessageContent(authorId, newContent, oldMessageId)
+        if (!(await ModMailPrisma.GET.isMessageValid(authorId, oldMessageId)) || !messageEdit) return
         const guild = await client.client.guilds.fetch(settings.GUILD_ID)
         const channel = await guild.channels.fetch(modMailStatus.channel!) as TextBasedChannel
         const oldStaffMessage = await channel.messages.fetch(messageEdit.staffMsgId)
@@ -40,8 +40,8 @@ module.exports = {
                     inline: true
                 }
             )
-            .setAuthor({ name: oldMessage.author.username, iconURL: oldMessage.author.avatarURL() ?? "https://imgur.com/a/mSdQgiK"})
+            .setAuthor({ name: oldMessage.author.username, iconURL: oldMessage.author.avatarURL() ?? "https://imgur.com/a/mSdQgiK" })
 
-        return await oldStaffMessage.edit({ embeds: [newEmbed] })
+        return await oldStaffMessage.edit({ embeds: [ newEmbed ] })
     }
 }

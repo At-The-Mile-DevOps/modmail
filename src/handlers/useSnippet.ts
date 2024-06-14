@@ -5,7 +5,7 @@ import client from "..";
 export default async function useSnippetFlow(message: Message, command: string) {
 	const snippet = await ModMailPrisma.GET.getSnippetByName(command)
 	if (!snippet) return
-	const user = await ModMailPrisma.GET.getChannelTicketUser(message.channel.id)
+	const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
 	if (!user) return
 	if (snippet.val.match("{r}")) {
 		if (message.content.split(" ").slice(1).join(" ").length === 0) return await message.reply("This snippet requires a reason.")
@@ -13,7 +13,7 @@ export default async function useSnippetFlow(message: Message, command: string) 
 	}
 	snippet.val = snippet.val.replace("{a}", `<@${message.author.id}>`)
 	snippet.val = snippet.val.replace("{u}", `<@${user}>`)
-	const status = await ModMailPrisma.GET.checkMarkedForDeletion(user)
+	const status = await ModMailPrisma.GET.isMarkedForDeletion(user)
 	if (status) {
 		clearTimeout(status)
 		const embed = new EmbedBuilder()
@@ -25,7 +25,7 @@ export default async function useSnippetFlow(message: Message, command: string) 
 		await message.reply({
 			embeds: [ embed ]
 		})
-		await ModMailPrisma.PATCH.cancelDeletion(user)
+		await ModMailPrisma.PATCH.resetDeletion(user)
 	}
 	const content = message.content.split(" ")
 	content.shift()
@@ -40,5 +40,5 @@ export default async function useSnippetFlow(message: Message, command: string) 
 	await message.delete()
 	const staffSentMessage = await message.channel.send({ embeds: [ embed ] })
 
-	return await ModMailPrisma.POST.createNewSequencedMessage(user, message.author.id, message.url, content.join(" "), userSentMessage.id, staffSentMessage.id, false, staffMember.displayName, true)
+	return await ModMailPrisma.POST.newSequencedMessage(user, message.author.id, message.url, content.join(" "), userSentMessage.id, staffSentMessage.id, false, staffMember.displayName, true)
 }
