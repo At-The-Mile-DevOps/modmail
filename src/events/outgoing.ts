@@ -11,6 +11,7 @@ import snippetFlow from "../handlers/snippet";
 import {Permit} from "../@types/types";
 import staffEditFlow from "../handlers/staffEdit";
 import staffAddFlow from "../handlers/staffAdd";
+import useSnippetFlow from "../handlers/useSnippet";
 
 module.exports = {
 	name: Events.MessageCreate,
@@ -55,6 +56,9 @@ module.exports = {
 			}
 			case "remove": {
 				return await staffAddFlow(message, "remove")
+			}
+			default: {
+				return await useSnippetFlow(message, command)
 			}
 		}
 	}
