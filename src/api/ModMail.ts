@@ -333,6 +333,7 @@ export default class ModMailPrisma {
 		 * @param name The name of the author. When in anon mode, this does not reveal to the user, but is required for internal tracking.
 		 * @param staff Whether the message came from a staff member.
 		 * @param hidden Whether the message should be hidden (i.e. not communicated through the bot).
+		 * @param image Whether the message is an image attachment.
 		 * @returns The new instance of the message as a `ModMailMessage`.
 		 * @author Tyler
 		 * @version 0.1
@@ -348,7 +349,8 @@ export default class ModMailPrisma {
 			anon: boolean,
 			name: string,
 			staff: boolean = false,
-			hidden: boolean = false): Promise<ModMailMessage> {
+			hidden: boolean = false,
+			image: boolean = false): Promise<ModMailMessage> {
 			const existingSequence = await prisma.modMailMessage.findFirst({
 				select: {
 					sequence: true
@@ -375,7 +377,8 @@ export default class ModMailPrisma {
 					anon,
 					name,
 					staff,
-					hidden
+					hidden,
+					image
 				}
 			})
 		}
@@ -513,14 +516,16 @@ export default class ModMailPrisma {
 		 * @version 0.1
 		 * @since 0.1.0
 		 */
-		public static async editMessageContent(discordId: string, newText: string, msgId?: string): Promise<ModMailMessage | false> {
+		public static async editMessageContent(discordId: string, ticketUser: string, newText: string, msgId?: string): Promise<ModMailMessage | false> {
 			// finds and edits latest (staff)
 			if (!msgId) {
 				const latest = await prisma.modMailMessage.findFirst({
 					where: {
 						author: discordId,
+						discordId: ticketUser,
 						staff: true,
-						hidden: false
+						hidden: false,
+						image: false
 					},
 					orderBy: {
 						sequence: "desc"

@@ -1,4 +1,4 @@
-import { EmbedBuilder, Message } from "discord.js"
+import { Attachment, EmbedBuilder, Message } from "discord.js"
 import ModMailPrisma from "../api/ModMail"
 import client from ".."
 import catLogger from "../utils/catloggr"
@@ -35,7 +35,7 @@ export default async function staffReplyFlow(message: Message) {
 	
 	const content = message.content.split(" ")
 	content.shift()
-	if (content.length === 0) content.push("*No content attached.*")
+	if (content.length === 0) content.push("*No text content attached.*")
 	
 	const staffMember = message.member!
 	
@@ -44,15 +44,22 @@ export default async function staffReplyFlow(message: Message) {
 		.setAuthor({ name: message.member?.displayName ?? message.author.username, iconURL: message.author.avatarURL() ?? undefined })
 		.setFooter({ text: staffMember.roles.highest.name })
 		.setColor(0x770202)
+
+	const files: Attachment[] = []
+
+	const attachments = message.attachments
+	attachments.forEach(async m => {
+		files.push(m)
+	})
 	
 	const replyUser = await client.client.users.fetch(user)
-	const userSentMessage = await replyUser.send({ embeds: [ embed ] })
-	
+	const userSentMessage = await replyUser.send({ embeds: [ embed ], files })
+	const staffSentMessage = await message.reply({ embeds: [ embed ], files })
+
 	await message.delete()
-	
-	const staffSentMessage = await message.channel.send({ embeds: [ embed ] })
+
+	await ModMailPrisma.POST.newSequencedMessage(replyUser.id, message.author.id, userSentMessage.url, content.join(" "), userSentMessage.id, staffSentMessage.id, false, message.author.username, true, false, false)
+
 
 	catLogger.events("Staff Reply Flow Concluded - Reply Sent")
-
-	return await ModMailPrisma.POST.newSequencedMessage(user, message.author.id, message.url, content.join(" "), userSentMessage.id, staffSentMessage.id, false, staffMember.displayName, true)
 }
