@@ -1,5 +1,5 @@
 import { ModMailStatus } from "@prisma/client";
-import { EmbedBuilder, Message, TextChannel } from "discord.js";
+import { Attachment, EmbedBuilder, Message, TextChannel } from "discord.js";
 import client from "..";
 import settings from "../settings.json"
 import ModMailPrisma from "../api/ModMail";
@@ -43,27 +43,36 @@ export default async function ticketReplyFlow(message: Message, channel: ModMail
 			name: message.author.username,
 			iconURL: message.author.avatarURL() ?? "https://imgur.com/a/mSdQgiK"
 		})
-		.setDescription(`${message.content.length > 0 ? message.content : "*No content attached.*"}`)
+		.setDescription(`${message.content.length > 0 ? message.content : "*No text content attached.*"}`)
 		.setColor(0x770202)
 		.setFooter({ text: "Ticket User" })
+
+	const files: Attachment[] = []
+
+	const attachments = message.attachments
+	attachments.forEach(async m => {
+		files.push(m)
+	})
 	
 	if (claimUser) {
 		const staffMsg = await channelResolvable.send({
 			content: `<@${claimUser}>`,
-			embeds: [ embed ]
+			embeds: [ embed ],
+			files
 		})
 		
 		await ModMailPrisma.POST.newSequencedMessage(message.author.id, message.author.id, message.url, message.content, message.id, staffMsg.id, false, message.author.username)
 	
 	} else {
 		const staffMsg = await channelResolvable.send({
-			embeds: [ embed ]
+			embeds: [ embed ],
+			files
 		})
 		
 		await ModMailPrisma.POST.newSequencedMessage(message.author.id, message.author.id, message.url, message.content, message.id, staffMsg.id, false, message.author.username)
 	}
 
-	catLogger.events("User Ticket Open Flow Concluded - Ticket Opened")
+	catLogger.events("User Ticket Reply Flow Concluded")
 
 	return await message.react("✅")
 }

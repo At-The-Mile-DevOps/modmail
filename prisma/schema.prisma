@@ -39,6 +39,7 @@ model ModMailMessage {
   name       String?
   staff      Boolean @default(false)
   hidden     Boolean @default(false)
+  image      Boolean @default(false)
 
   @@id(name: "messageSequenceId", [discordId, sequence])
 }
