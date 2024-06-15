@@ -35,6 +35,7 @@ export default async function staffReplyFlow(message: Message) {
 	
 	const content = message.content.split(" ")
 	content.shift()
+	if (content.length === 0) content.push("*No content attached.*")
 	
 	const staffMember = message.member!
 	

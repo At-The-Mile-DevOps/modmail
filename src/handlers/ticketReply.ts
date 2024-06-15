@@ -43,7 +43,7 @@ export default async function ticketReplyFlow(message: Message, channel: ModMail
 			name: message.author.username,
 			iconURL: message.author.avatarURL() ?? "https://imgur.com/a/mSdQgiK"
 		})
-		.setDescription(message.content)
+		.setDescription(`${message.content.length > 0 ? message.content : "*No content attached.*"}`)
 		.setColor(0x770202)
 		.setFooter({ text: "Ticket User" })
 	
