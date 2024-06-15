@@ -1,4 +1,5 @@
 import { Client, Collection } from "discord.js"
+import Semaphore from "ts-semaphore"
 
 /**
  * Typecast extension on the original Client to allow for extended collections.
@@ -24,4 +25,9 @@ enum Permit {
 	"DEVOPS" = 10
 }
 
-export { Permit }
+/**
+ * Controls the request ratelimit, with one completed request per cycle.
+ */
+const rateLimit = new Semaphore(1)
+
+export { Permit, rateLimit }
