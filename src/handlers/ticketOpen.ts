@@ -68,7 +68,7 @@ export default async function ticketOpenFlow(message: Message) {
 		.setColor(0x770202)
 		.setFooter({ text: "At The Mile ModMail" })
 
-	catLogger.events("User Ticket Open Flow Concluded - Ticket Opened")
+	catLogger.events("User Ticket Reply Flow Concluded - Ticket Opened")
 	
 	return message.reply({
 		embeds: [ embed ]

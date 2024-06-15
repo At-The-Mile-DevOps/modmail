@@ -14,7 +14,8 @@ export default async function staffEditFlow(message: Message) {
     
     const channelId = message.channel.id
     
-    const newContent = message.content.split(" ").slice(1).join(" ")
+    let newContent = message.content.split(" ").slice(1).join(" ")
+    if (newContent.length === 0) newContent = "*No content attached.*"
     
     const status = await ModMailPrisma.GET.isTicketChannel(channelId)
     if (!status) return await message.reply("This can only be used in a ticket channel.")
