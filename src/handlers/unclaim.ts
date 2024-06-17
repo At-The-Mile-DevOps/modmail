@@ -19,7 +19,7 @@ export default async function unclaimFlow(message: Message) {
 	if (!ticketObject) return await message.reply("This user does not currently have a ticket open.")
 	if (!ticketObject.claimedBy || ticketObject.claimedBy != message.author.id) return await message.reply("This ticket isn't claimed by you.")
 	
-	await ModMailPrisma.PATCH.setClaimUser(status, message.author.id)
+	await ModMailPrisma.PATCH.resetClaimUser(ticketObject.discordId)
 	
 	await (message.channel as TextChannel).setTopic(`${(message.channel as TextChannel).topic!.split(" | ")[ 0 ]} | Claimed by no one.`)
 
