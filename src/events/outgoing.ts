@@ -56,7 +56,7 @@ async function outgoingRequest(message: Message) {
 		case "ar":
 		case "anonreply": {
 			catLogger.events("Staff Anon-Reply Flow Started")
-			if (user < Permit.HR) return await message.reply("Only HR and above can use anonymous replies!")
+			if (user < Permit.HRM) return await message.reply("Only HRM and above can use anonymous replies!")
 
 			return await anonStaffReplyFlow(message)
 		}
