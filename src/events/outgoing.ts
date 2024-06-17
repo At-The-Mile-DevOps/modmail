@@ -1,4 +1,4 @@
-import {Events, Message} from "discord.js";
+import {ChannelType, Events, Message} from "discord.js";
 import settings from "../settings.json"
 import ModMailPrisma from "../api/ModMail";
 import staffReplyFlow from "../handlers/staffReply";
@@ -40,6 +40,7 @@ async function outgoingRequest(message: Message) {
 	if (!initialMsg.startsWith(settings.prefix)) return
 
 	if (message.author.bot) return
+	if (message.channel.type === ChannelType.DM) return
 
 	if (user < Permit.EARLY_ACCESS_STAFF) return await message.reply({ content: "You currently do not have permission to access this ModMail feature." })
 
