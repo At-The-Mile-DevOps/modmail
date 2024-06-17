@@ -20,6 +20,26 @@ export default async function ticketCloseFlow(message: Message) {
 		return [ false, null, null ]
 	
 	} else {
+		const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
+		if (!user) return await message.reply("Could not find a ticket to close for that user.")
+			
+		const markedStatus = await ModMailPrisma.GET.isMarkedForDeletion(user)
+		if (markedStatus) {
+			clearTimeout(markedStatus)
+			const embed = new EmbedBuilder()
+				.setTitle("Close Cancelled")
+				.setDescription("Scheduled close cancelled.")
+				.setColor(0x770202)
+				.setFooter({ text: "At The Mile ModMail" })
+
+			await message.reply({
+				embeds: [ embed ]
+			})
+
+			catLogger.events("Ticket Scheduled Close Cancelled")
+
+			await ModMailPrisma.PATCH.resetDeletion(user)
+		}
 		
 		const args = message.content.split(" ")
 		args.shift()
