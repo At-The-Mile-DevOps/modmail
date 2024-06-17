@@ -33,7 +33,7 @@ export default async function ticketOpenFlow(message: Message) {
 	
 	const newChannel = await category.children.create({
 		name: `${message.author.username}`,
-		topic: `ModMail conversation with ID ${message.author.id} | Claimed by no one.`
+		topic: `ModMail conversation with ID ${message.author.id}`
 	})
 	
 	const sentMessage = await newChannel.send({ embeds: [ firstEmbed, introEmbed ] })

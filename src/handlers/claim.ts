@@ -22,8 +22,6 @@ export default async function claimFlow(message: Message) {
 	if (ticketObject.claimedBy) return await message.reply("This ticket is already claimed.")
 	
 	await ModMailPrisma.PATCH.setClaimUser(status, message.author.id)
-	
-	await (message.channel as TextChannel).setTopic(`${(message.channel as TextChannel).topic!.split(" | ")[ 0 ]} | Claimed by ${message.author.displayName}.`)
 
 	catLogger.events("Staff Claim Flow Concluded - User Claim Swapped")
 	

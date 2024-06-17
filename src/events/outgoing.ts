@@ -28,7 +28,9 @@ module.exports = {
 	once: false,
 	async execute(message: Message) {
 		rateLimit.use(async () => {
+			catLogger.events(`Locking ratelimiter for ${message.content}`)
 			await outgoingRequest(message)
+			catLogger.events(`Unlocking ratelimiter for ${message.content}`)
 		})
 	}
 }

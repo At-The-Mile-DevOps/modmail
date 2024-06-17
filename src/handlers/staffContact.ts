@@ -42,7 +42,7 @@ export default async function staffContactFlow(message: Message) {
 	} else {
 		const channel = await (await client.client.guilds.fetch(settings.GUILD_ID)).channels.create({
 			name: `${resolved.username}`,
-			topic: `ModMail conversation with ID ${user} | Claimed by ${message.author.displayName}.`,
+			topic: `ModMail conversation with ID ${user}`,
 			parent: `${await ModMailPrisma.GET.getCategoryByName('pending')}`
 		})
 		
