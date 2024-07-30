@@ -3,6 +3,7 @@ import ModMailPrisma from "../api/ModMail"
 import client from ".."
 import settings from "../settings.json"
 import catLogger from "../utils/catloggr"
+import { MainTracer } from "../utils/trace"
 
 /**
  * Handles all standard and timed ticket closures with or without a provided reason.
@@ -11,135 +12,178 @@ import catLogger from "../utils/catloggr"
  * @version 0.1
  * @since 0.1.0
  */
-export default async function ticketCloseFlow(message: Message) {
-	
-	const status = await ModMailPrisma.GET.isTicketChannel(message.channel.id)
-	if (!status) {
-		
-		await message.reply({ content: "This must be used in an active ticket channel!" })
-		return [ false, null, null ]
-	
-	} else {
-		const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
-		if (!user) return await message.reply("Could not find a ticket to close for that user.")
-			
-		const markedStatus = await ModMailPrisma.GET.isMarkedForDeletion(user)
-		if (markedStatus) {
-			clearTimeout(markedStatus)
-			const embed = new EmbedBuilder()
-				.setTitle("Close Cancelled")
-				.setDescription("Scheduled close cancelled.")
-				.setColor(0x770202)
-				.setFooter({ text: "At The Mile ModMail" })
-
-			await message.reply({
-				embeds: [ embed ]
+export default async function ticketCloseFlow(message: Message, traceId: string) {
+	try {
+		MainTracer.appendToTrace(traceId, {
+			subFlowEntry: "Entered Ticket Close Subflow Handler"
+		})
+		const status = await ModMailPrisma.GET.isTicketChannel(message.channel.id)
+		if (!status) {
+			MainTracer.appendToTrace(traceId, {
+				exitReason: "No existing ticket"
 			})
-
-			catLogger.events("Ticket Scheduled Close Cancelled")
-
-			await ModMailPrisma.PATCH.resetDeletion(user)
-		}
+			MainTracer.closeTrace(traceId, true)
+			await message.reply({ content: "This must be used in an active ticket channel!" })
+			return [ false, null, null ]
 		
-		const args = message.content.split(" ")
-		args.shift()
-		
-		let argExists = (args[ 0 ] !== undefined)
-		
-		if (argExists) {
-			
-			if (args[ 0 ] == "cancel") {
-				
-				const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
-				if (!user) return await message.reply("There is no user to close a ticket for.")
-				
-				const status = await ModMailPrisma.GET.isMarkedForDeletion(user)
-				if (status) {
-					
-					clearTimeout(status)
-					
-					const embed = new EmbedBuilder()
-						.setTitle("Close Cancelled")
-						.setDescription("Scheduled close cancelled.")
-						.setColor(0x770202)
-						.setFooter({ text: "At The Mile ModMail" })
-
-					await message.reply({
-						embeds: [ embed ]
-					})
-					
-					catLogger.events("Ticket Scheduled Close Cancelled")
-
-					return await ModMailPrisma.PATCH.resetDeletion(user)
-				}
+		} else {
+			const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
+			if (!user) {
+				MainTracer.appendToTrace(traceId, {
+					exitReason: "No existing ticket"
+				})
+				MainTracer.closeTrace(traceId, true)
+				return await message.reply("Could not find a ticket to close for that user.")
 			}
-			
-			let delayed = args[ 0 ].match(/[0-9]{1,}[mhd]/g)
-			
-			if (delayed) {
 				
-				const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id) as string // legal as we know the channel is bound atp
-				const unit = args[ 0 ].charAt(args[ 0 ].length - 1)
-				
-				let flag = false
-				
-				let amount = parseInt(args[ 0 ].slice(0, args[ 0 ].length - 1))
-				let totalAmount = 0
-				
-				switch (unit) {
-					case "m": {
-						if (amount > 4320) {
-							amount = 4320
-							flag = true
-						}
-						totalAmount = (amount * 60 * 1000)
-						break
-					}
-					
-					case "h": {
-						if (amount > 72) {
-							amount = 72
-							flag = true
-						}
-						totalAmount = (amount * 60 * 60 * 1000)
-						break
-					}
-					
-					case "d": {
-						if (amount > 3) {
-							amount = 3
-							flag = true
-						}
-						totalAmount = (amount * 60 * 60 * 24 * 1000)
-					}
-				}
-				
-				args.shift()
-				
-				const closeScheduleEmbed = new EmbedBuilder()
-					.setTitle("Scheduled Close")
-					.setDescription(`Close scheduled for ${amount} ${unit == "m" ? "minutes" : unit == "d" ? "days" : "hours"} from this message.${flag ? "\nThis close was truncated to 3 days." : ""}`)
+			const markedStatus = await ModMailPrisma.GET.isMarkedForDeletion(user)
+			if (markedStatus) {
+				clearTimeout(markedStatus)
+				const embed = new EmbedBuilder()
+					.setTitle("Close Cancelled")
+					.setDescription("Scheduled close cancelled.")
 					.setColor(0x770202)
 					.setFooter({ text: "At The Mile ModMail" })
-				
-				await message.reply({
-					embeds: [ closeScheduleEmbed ]
-				})
-				
-				const timeoutId = setTimeout(async () => {
-					await closeFunction(message, args.join(" "))
-				}, totalAmount)
-				
-				catLogger.events("Staff Ticket Close Flow Concluded - Ticket Close Scheduled")
 
-				return await ModMailPrisma.PATCH.setForDeletion(user, `${timeoutId as any}`)
-			
-			} else {
-				await closeFunction(message, args.join(" "))
+				await message.reply({
+					embeds: [ embed ]
+				})
+
+				catLogger.events("Ticket Scheduled Close Cancelled")
+
+				await ModMailPrisma.PATCH.resetDeletion(user)
 			}
-		} else {
-			await closeFunction(message, "No reason provided.")
+			
+			const args = message.content.split(" ")
+			args.shift()
+			
+			let argExists = (args[ 0 ] !== undefined)
+			
+			if (argExists) {
+				
+				if (args[ 0 ] == "cancel") {
+					
+					const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id)
+					if (!user) return await message.reply("There is no user to close a ticket for.")
+					
+					const status = await ModMailPrisma.GET.isMarkedForDeletion(user)
+					if (status) {
+						
+						clearTimeout(status)
+						
+						const embed = new EmbedBuilder()
+							.setTitle("Close Cancelled")
+							.setDescription("Scheduled close cancelled.")
+							.setColor(0x770202)
+							.setFooter({ text: "At The Mile ModMail" })
+
+						await message.reply({
+							embeds: [ embed ]
+						})
+						
+						catLogger.events("Ticket Scheduled Close Cancelled")
+
+						
+						await ModMailPrisma.PATCH.resetDeletion(user)
+						MainTracer.appendToTrace(traceId, {
+							exitReason: "Gracefully exited Close Cancel handler"
+						})
+						MainTracer.closeTrace(traceId, true)
+						return
+					}
+				}
+				
+				let delayed = args[ 0 ].match(/[0-9]{1,}[mhd]/g)
+				
+				if (delayed) {
+					
+					const user = await ModMailPrisma.GET.getTicketUserByChannel(message.channel.id) as string // legal as we know the channel is bound atp
+					const unit = args[ 0 ].charAt(args[ 0 ].length - 1)
+					
+					let flag = false
+					
+					let amount = parseInt(args[ 0 ].slice(0, args[ 0 ].length - 1))
+					let totalAmount = 0
+					
+					switch (unit) {
+						case "m": {
+							if (amount > 4320) {
+								amount = 4320
+								flag = true
+							}
+							totalAmount = (amount * 60 * 1000)
+							break
+						}
+						
+						case "h": {
+							if (amount > 72) {
+								amount = 72
+								flag = true
+							}
+							totalAmount = (amount * 60 * 60 * 1000)
+							break
+						}
+						
+						case "d": {
+							if (amount > 3) {
+								amount = 3
+								flag = true
+							}
+							totalAmount = (amount * 60 * 60 * 24 * 1000)
+						}
+					}
+					
+					args.shift()
+					
+					const closeScheduleEmbed = new EmbedBuilder()
+						.setTitle("Scheduled Close")
+						.setDescription(`Close scheduled for ${amount} ${unit == "m" ? "minutes" : unit == "d" ? "days" : "hours"} from this message.${flag ? "\nThis close was truncated to 3 days." : ""}`)
+						.setColor(0x770202)
+						.setFooter({ text: "At The Mile ModMail" })
+					
+					await message.reply({
+						embeds: [ closeScheduleEmbed ]
+					})
+					
+					const timeoutId = setTimeout(async () => {
+						await closeFunction(message, args.join(" "))
+					}, totalAmount)
+					
+					catLogger.events("Staff Ticket Close Flow Concluded - Ticket Close Scheduled")
+
+					await ModMailPrisma.PATCH.setForDeletion(user, `${timeoutId as any}`)
+					MainTracer.appendToTrace(traceId, {
+						exitReason: "Gracefully exited Close Schedule handler",
+						closeTime: totalAmount
+					})
+					MainTracer.closeTrace(traceId, true)
+					return
+				
+				} else {
+					await closeFunction(message, args.join(" "))
+					MainTracer.appendToTrace(traceId, {
+						exitReason: "Gracefully exited Close Immediate handler"
+					})
+					MainTracer.closeTrace(traceId, true)
+					return
+				}
+			} else {
+				await closeFunction(message, "No reason provided.")
+				MainTracer.appendToTrace(traceId, {
+					exitReason: "Gracefully exited Close Immediate handler"
+				})
+				MainTracer.closeTrace(traceId, true)
+				return
+			}
 		}
+	} catch (e: any) {
+		catLogger.debug("Error occurred within ticket close subflow handler:")
+        catLogger.debug(e.message)
+        MainTracer.appendToTrace(traceId, {
+            exitReason: "Catch loop invoked.",
+            errorMessage: e.message
+        })
+        MainTracer.closeTrace(traceId, false)
 	}
 }
 

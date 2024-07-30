@@ -78,10 +78,6 @@ export default class ModMailClient {
 			}
 			catLogger.client(`Deploying listener ${file} on event ${event.name}...`);
 		}
-		catLogger.client(`The following events have deployed listeners...`);
-		for (const event of this.client.eventNames()) {
-			catLogger.client(event);
-		}
 
 		this.client.login(this.token).then((user: string) => {
 			catLogger.client("Logged in successfully!");
