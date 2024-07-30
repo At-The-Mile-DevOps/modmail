@@ -24,7 +24,7 @@ module.exports = {
 }
 
 async function messageEditRequest(oldMessage: Message | PartialMessage, newMessage: Message | PartialMessage) {
-    const id = uuidv4().slice(8)
+    const id = uuidv4().slice(0,8)
     MainTracer.startTrace(id, {})
     try {
         // Resolve partials if they exist

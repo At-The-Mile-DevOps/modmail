@@ -41,7 +41,7 @@ async function outgoingRequest(message: Message) {
 	if (message.author.bot) return
 	if (message.channel.type === ChannelType.DM) return
 
-	const id = uuidv4().slice(8)
+	const id = uuidv4().slice(0, 8)
 	MainTracer.startTrace(id, {
 		author: message.author.id,
 		message: message.content,
@@ -56,6 +56,7 @@ async function outgoingRequest(message: Message) {
 				exitReason: "Outgoing message does not have prefix."
 			})
 			MainTracer.closeTrace(id, true)
+			return
 		}
 
 		

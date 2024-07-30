@@ -61,10 +61,6 @@ async function incomingRequest(message: Message) {
 					})
 					await ticketReplyFlow(message, channel, id)
 				}
-				MainTracer.appendToTrace(id, {
-					exitReason: "Gracefully exited incoming flow receiver."
-				})
-				MainTracer.closeTrace(id, true)
 			} catch (e: any) {
 				catLogger.debug("Error occurred within incoming message handler:")
 				catLogger.debug(e.message)
