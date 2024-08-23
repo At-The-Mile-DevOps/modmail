@@ -58,9 +58,7 @@ async function outgoingRequest(message: Message) {
 			MainTracer.closeTrace(id, true)
 			return
 		}
-
 		
-
 		if (user < Permit.EARLY_ACCESS_STAFF) {
 			MainTracer.appendToTrace(id, {
 				exitReason: "Inapplicable permit."
@@ -162,6 +160,15 @@ async function outgoingRequest(message: Message) {
 				})
 				await staffAddFlow(message, "add", id)
 				break
+			}
+
+			case "au":
+			case "adduser": {
+				catLogger.events("Staff Add Ticket User Flow Started")
+				MainTracer.appendToTrace(id, {
+					receiveResolution: "Entered Staff Add User Flow"
+				})
+				
 			}
 
 			case "remove": {

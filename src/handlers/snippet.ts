@@ -1,7 +1,7 @@
 import { EmbedBuilder, Message } from "discord.js";
 import ModMailPrisma from "../api/ModMail";
 import settings from "../settings.json"
-import reservedSnippetNames from "../utils/reservedWords";
+import RESERVED_SNIPPET_NAMES from "../utils/reservedWords";
 import { Permit } from "../@types/types";
 import catLogger from "../utils/catloggr";
 import { MainTracer } from "../utils/trace";
@@ -36,7 +36,7 @@ export default async function snippetFlow(message: Message, traceId: string) {
            
             let oldVal = val
             
-            if (reservedSnippetNames.includes(name)) {
+            if (RESERVED_SNIPPET_NAMES.includes(name)) {
                 MainTracer.appendToTrace(traceId, {
                     exitReason: "Reserved snippet name attempted"
                 })

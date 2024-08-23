@@ -24,7 +24,6 @@ export default class ModMailClient {
 			GatewayIntentBits.Guilds,
 			GatewayIntentBits.GuildMembers,
 			GatewayIntentBits.GuildMessages,
-			GatewayIntentBits.GuildPresences,
 			GatewayIntentBits.MessageContent,
 			GatewayIntentBits.DirectMessages,
 			GatewayIntentBits.DirectMessageTyping,
@@ -50,6 +49,7 @@ export default class ModMailClient {
 	 */
 	public start() {
 		this.deploy();
+		catLogger.client(`Starting ATM Modmail at process PID ${process.pid}...`);
 		catLogger.client("start() deployed commands successfully.");
 		const cmdDir = path.join(__dirname, "commands");
 		const eventsDir = path.join(__dirname, "events");

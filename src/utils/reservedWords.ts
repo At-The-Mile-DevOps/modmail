@@ -1,4 +1,4 @@
-const reservedSnippetNames = [
+const RESERVED_SNIPPET_NAMES = [
     "r",
     "reply",
     "ar",
@@ -19,4 +19,4 @@ const reservedSnippetNames = [
     "bl"
 ]
 
-export default reservedSnippetNames
+export default RESERVED_SNIPPET_NAMES

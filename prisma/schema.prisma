@@ -9,8 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./main.db"
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
 }
 
 model AccessGate {
@@ -19,12 +19,17 @@ model AccessGate {
 }
 
 model ModMailStatus {
-  discordId String   @id
+  id        Int     @id @default(sequence())
   channel   String?
   claimed   Boolean
   openTime  DateTime @default(now())
   claimedBy String?
   closeId   String?
+}
+
+model ModMailUsers {
+  discordId String  @id
+  modMailStatus Int
 }
 
 model ModMailMessage {

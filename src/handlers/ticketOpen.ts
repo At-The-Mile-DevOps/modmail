@@ -20,6 +20,16 @@ export default async function ticketOpenFlow(message: Message, traceId: string) 
 		})
 		const guild = await client.client.guilds.fetch(settings.GUILD_ID)
 		const guildUser = await guild.members.fetch(message.author.id)
+
+		const embed = new EmbedBuilder()
+			.setTitle("New ModMail Ticket")
+			.setDescription(`Your ticket has been created! Please wait while a member of the appropriate department gets back to you.`)
+			.setColor(0x770202)
+			.setFooter({ text: "At The Mile ModMail" })
+
+		await message.reply({
+			embeds: [ embed ]
+		})
 		
 		const firstEmbed = await newMessageEmbed(guildUser)
 		
@@ -41,42 +51,41 @@ export default async function ticketOpenFlow(message: Message, traceId: string) 
 		})
 		
 		const sentMessage = await newChannel.send({ embeds: [ firstEmbed, introEmbed ] })
-		
 		await ModMailPrisma.POST.newModMailThread(message.author.id, newChannel.id)
 		
 		await ModMailPrisma.POST.newSequencedMessage(message.author.id, message.author.id, message.url, message.content, message.id, sentMessage.id, false, message.author.username)
 		
-		const attachments = message.attachments
-		attachments.forEach(async m => {
+		for (const attachment of message.attachments.values()) {
 			let imgMessage;
-			if (m.contentType?.includes("image/")) {
+			if (attachment.contentType?.includes("image/")) {
 				const imgEmbed = new EmbedBuilder()
-					.setTitle("Attached Image")
-					.setColor(0x770202)
-					.setFooter({ text: "Ticket User" })
-					.setImage(m.proxyURL)
+				.setTitle("Attached Image")
+				.setColor(0x770202)
+				.setFooter({ text: "Ticket User" })
+				.setImage(attachment.proxyURL);
 
-				imgMessage = await newChannel.send({ embeds: [ imgEmbed ] })
+				imgMessage = await newChannel.send({ embeds: [imgEmbed] });
 			} else {
-				imgMessage = await newChannel.send({ content: `Attached file with name ${m.name} - **be careful when clicking on unknown files!** When in doubt, do not click.\n\n${m.proxyURL}` })
+				imgMessage = await newChannel.send({
+				content: `Attached file with name ${attachment.name} - **be careful when clicking on unknown files!** When in doubt, do not click.\n\n${attachment.proxyURL}`,
+				});
 			}
-			
-			await ModMailPrisma.POST.newSequencedMessage(message.author.id, message.author.id, m.proxyURL, `User attached image with the following proxy URL - ${m.proxyURL}.`, m.id, imgMessage.id, false, message.author.username)
-		})
+
+			await ModMailPrisma.POST.newSequencedMessage(
+				message.author.id,
+				message.author.id,
+				attachment.proxyURL,
+				`User attached image with the following proxy URL - ${attachment.proxyURL}.`,
+				attachment.id,
+				imgMessage.id,
+				false,
+				message.author.username
+			);
+		}
 		
 		await message.react("✅")
-		
-		const embed = new EmbedBuilder()
-			.setTitle("New ModMail Ticket")
-			.setDescription(`Your ticket has been created! Please wait while a member of the appropriate department gets back to you.`)
-			.setColor(0x770202)
-			.setFooter({ text: "At The Mile ModMail" })
 
 		catLogger.events("User Ticket Reply Flow Concluded - Ticket Opened")
-		
-		await message.reply({
-			embeds: [ embed ]
-		})
 
 		MainTracer.appendToTrace(traceId, {
 			exitReason: "Gracefully exited Ticket Open handler"

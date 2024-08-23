@@ -1,4 +1,4 @@
-import { BannedUsers, Categories, ModMailMessage, ModMailStatus, PendingMessages, Snippets } from "@prisma/client";
+import { BannedUsers, Categories, ModMailMessage, ModMailStatus, ModMailUsers, PendingMessages, Snippets } from "@prisma/client";
 import { prisma } from ".."
 import { Permit } from "../@types/types";
 import { v4 as uuidv4 } from "uuid"
@@ -30,13 +30,13 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async isUserTicketOpened(discordId: string): Promise<boolean> {
-			const status = await prisma.modMailStatus.findFirst({
-				where: {
-					discordId
-				}
-			})
+			const status = await prisma.$queryRaw<ModMailUsers[]>`
+			SELECT discordId 
+			FROM ModMailUsers 
+			WHERE discordId = ${discordId}
+			LIMIT 1`
 
-			return status != null
+			return status.length > 0
 		}
 
 		/**
@@ -48,11 +48,14 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async getUserTicketObject(discordId: string): Promise<ModMailStatus | null> {
-			return prisma.modMailStatus.findFirst({
-				where: {
-					discordId
-				}
-			})
+			const ticket = await prisma.$queryRaw<ModMailStatus[]>`
+			SELECT s.*
+			FROM ModMailStatus s
+			JOIN ModMailUsers u
+			ON u.modMailStatus = s.id
+			`
+
+			return ticket[0] ?? null
 		}
 
 		/**
@@ -64,13 +67,13 @@ export default class ModMailPrisma {
 		 * @since 0.1.0 
 		 */
 		public static async isTicketChannel(channel: string): Promise<boolean> {
-			const status = await prisma.modMailStatus.findFirst({
-				where: {
-					channel
-				}
-			})
+			const status = await prisma.$queryRaw<ModMailStatus[]>`
+			SELECT id
+			FROM ModMailStatus
+			WHERE channel = ${channel}
+			`
 
-			return status != null
+			return status.length > 0
 		}
 
 		/**
@@ -81,14 +84,15 @@ export default class ModMailPrisma {
 		 * @version 0.1
 		 * @since 0.1.0
 		 */
-		public static async getTicketUserByChannel(channel: string): Promise<string | undefined> {
-			const status = await prisma.modMailStatus.findFirst({
-				where: {
-					channel
-				}
-			})
-
-			return status?.discordId
+		public static async getTicketUserByChannel(channel: string): Promise<string | null> {
+			const status = await prisma.$queryRaw<(ModMailStatus & ModMailUsers)[]>`
+			SELECT s.*, u.*
+			FROM ModMailStatus s
+			JOIN ModMailUsers u
+			ON s.id = u.modMailStatus
+			WHERE s.channel = ${channel}
+			`
+			return status[0].discordId ?? null
 		}
 
 		/**
@@ -99,12 +103,14 @@ export default class ModMailPrisma {
 		 * @version 0.1
 		 * @since 0.1.0
 		 */
-		public static async getCategoryByName(name: string): Promise<string | undefined> {
-			return (await prisma.categories.findFirst({
-				where: {
-					name
-				}
-			}))?.channelId
+		public static async getCategoryByName(name: string): Promise<string | null> {
+			const result = await prisma.$queryRaw<Categories[]>`
+			SELECT channelId
+			FROM Categories
+			WHERE name = ${name}
+			`
+
+			return result[0].channelId ?? null
 		}
 
 		/**
@@ -129,20 +135,13 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async getCategoryBySearch(query: string): Promise<Categories[]> {
-			return prisma.categories.findMany({
-				where: {
-					OR: [
-						{
-							name: {
-								contains: query
-							}
-						},
-						{
-							short: query
-						}
-					]
-				}
-			})
+			const result = await prisma.$queryRaw<Categories[]>`
+			SELECT *
+			FROM Categories
+			WHERE name LIKE ${query}
+			OR short = ${query}
+			`
+			return result
 		}
 
 		/**
@@ -156,22 +155,16 @@ export default class ModMailPrisma {
 		 * @remarks **Do not confuse this for a print and delete function! The transcript is printed, but the ticket must still be deleted.**
 		 */
 		public static async printTranscript(discordId: string): Promise<string[][]> {
-			const output = await prisma.modMailMessage.findMany({
-				where: {
-					discordId,
-					hidden: false
-				}
-			})
-			let printOutput = output.map(entry => `${entry.anon ? "Anonymous" : `${entry.name} (${entry.author})`}: ${entry.content}`)
+			const output = await prisma.$queryRaw<ModMailMessage[]>`
+			SELECT *
+			FROM ModMailMessage
+			WHERE discordId = ${discordId}
+			AND hidden = FALSE
+			`
+			let printOutput = output.filter(e => e.hidden === false).map(entry => `${entry.anon ? "Anonymous" : `${entry.name} (${entry.author})`}: ${entry.content}`)
 			printOutput.unshift(`Ticket Transcript for ${discordId}:`)
 
-			const staffQuery = await prisma.modMailMessage.findMany({
-				where: {
-					discordId
-				}
-			})
-
-			const staffOutput = staffQuery.map(entry => `${entry.hidden ? "(Hidden Message) " : ""}${entry.anon ? "Anonymous" : `${entry.name} (${entry.author})`}: ${entry.content}`)
+			const staffOutput = output.map(entry => `${entry.hidden ? "(Hidden Message) " : ""}${entry.anon ? "Anonymous" : `${entry.name} (${entry.author})`}: ${entry.content}`)
 			staffOutput.unshift(`Staff Ticket Transcript for ${discordId}:`)
 
 			return [ printOutput, staffOutput ]
@@ -187,20 +180,20 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async getTemporaryMessage(discordId: string): Promise<PendingMessages | null> {
-			const message = await prisma.pendingMessages.findFirst({
-				where: {
-					discordId
-				}
-			})
+			const message = await prisma.$queryRaw<PendingMessages[]>`
+			SELECT *
+			FROM PendingMessages
+			WHERE discordId = ${discordId}
+			`
 
-			if (!message) return null
+			if (!message[0]) return null
 			else {
 				await prisma.pendingMessages.delete({
 					where: {
 						discordId
 					}
 				})
-				return message
+				return message[0]
 			}
 		}
 
@@ -280,9 +273,20 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async isMarkedForDeletion(discordId: string): Promise<string | null> {
-			const ticket = await prisma.modMailStatus.findFirst({
+			const id = await prisma.modMailUsers.findFirst({
+				select: {
+					modMailStatus: true
+				},
 				where: {
 					discordId
+				}
+			})
+
+			if (!id) return null
+
+			const ticket = await prisma.modMailStatus.findFirst({
+				where: {
+					id: id.modMailStatus
 				}
 			})
 			if (!ticket) return null
@@ -309,14 +313,21 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async newModMailThread(discordId: string, channel: string, claimedBy?: string): Promise<ModMailStatus> {
-			return prisma.modMailStatus.create({
+			const status = await prisma.modMailStatus.create({
 				data: {
-					discordId,
 					channel,
 					claimedBy,
 					claimed: (claimedBy !== null)
 				}
 			})
+			await prisma.modMailUsers.create({
+				data: {
+					discordId,
+					modMailStatus: status.id
+				}
+			})
+
+			return status
 		}
 
 		/**
@@ -576,10 +587,21 @@ export default class ModMailPrisma {
 		 * @version 0.1
 		 * @since 0.1.0
 		 */
-		public static async setForDeletion(discordId: string, id: string): Promise<ModMailStatus> {
-			return prisma.modMailStatus.update({
+		public static async setForDeletion(discordId: string, id: string): Promise<ModMailStatus | null> {
+			const mid = await prisma.modMailUsers.findFirst({
+				select: {
+					modMailStatus: true
+				},
 				where: {
 					discordId
+				}
+			})
+
+			if (!mid) return null
+
+			return prisma.modMailStatus.update({
+				where: {
+					id: mid.modMailStatus
 				},
 				data: {
 					closeId: id
@@ -615,10 +637,21 @@ export default class ModMailPrisma {
 		 * @version 0.1
 		 * @since 0.1.0
 		 */
-		public static async resetDeletion(discordId: string): Promise<ModMailStatus> {
-			return prisma.modMailStatus.update({
+		public static async resetDeletion(discordId: string): Promise<ModMailStatus | null> {
+			const mid = await prisma.modMailUsers.findFirst({
+				select: {
+					modMailStatus: true
+				},
 				where: {
 					discordId
+				}
+			})
+
+			if (!mid) return null
+
+			return prisma.modMailStatus.update({
+				where: {
+					id: mid.modMailStatus
 				},
 				data: {
 					closeId: null
@@ -636,9 +669,20 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async setClaimUser(userDiscordId: string, claimDiscordId: string) {
-			return prisma.modMailStatus.update({
+			const mid = await prisma.modMailUsers.findFirst({
+				select: {
+					modMailStatus: true
+				},
 				where: {
 					discordId: userDiscordId
+				}
+			})
+
+			if (!mid) return null
+
+			return prisma.modMailStatus.update({
+				where: {
+					id: mid.modMailStatus
 				},
 				data: {
 					claimedBy: claimDiscordId
@@ -655,9 +699,20 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async resetClaimUser(userDiscordId: string) {
-			return prisma.modMailStatus.update({
+			const mid = await prisma.modMailUsers.findFirst({
+				select: {
+					modMailStatus: true
+				},
 				where: {
 					discordId: userDiscordId
+				}
+			})
+
+			if (!mid) return null
+
+			return prisma.modMailStatus.update({
+				where: {
+					id: mid.modMailStatus
 				},
 				data: {
 					claimedBy: null
@@ -682,16 +737,26 @@ export default class ModMailPrisma {
 		 * @version 0.1
 		 * @since 0.1.0
 		 */
-		public static async deleteTicket(discordId: string): Promise<void> {
-			await prisma.modMailMessage.deleteMany({
+		public static async deleteTicket(discordId: string): Promise<void | null> {
+			const mid = await prisma.modMailUsers.findFirst({
+				select: {
+					modMailStatus: true
+				},
 				where: {
 					discordId
 				}
 			})
 
-			await prisma.modMailStatus.deleteMany({
+			if (!mid) return null
+
+			await prisma.modMailMessage.deleteMany({
 				where: {
 					discordId
+				}
+			})
+			await prisma.modMailStatus.deleteMany({
+				where: {
+					id: mid.modMailStatus
 				}
 			})
 		}
