@@ -772,6 +772,11 @@ export default class ModMailPrisma {
 					id: mid.modMailStatus
 				}
 			})
+			await prisma.modMailUsers.deleteMany({
+				where: {
+					modMailStatus: mid.modMailStatus
+				}
+			})
 		}
 
 		/**
