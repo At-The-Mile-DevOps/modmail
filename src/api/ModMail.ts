@@ -30,11 +30,11 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async isUserTicketOpened(discordId: string): Promise<boolean> {
-			const status = await prisma.$queryRaw<ModMailUsers[]>`
-			SELECT discordId 
-			FROM ModMailUsers 
-			WHERE discordId = ${discordId}
-			LIMIT 1`
+			const status = await prisma.modMailUsers.findMany({
+				where: {
+					discordId
+				}
+			})
 
 			return status.length > 0
 		}
@@ -48,14 +48,19 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async getUserTicketObject(discordId: string): Promise<ModMailStatus | null> {
-			const ticket = await prisma.$queryRaw<ModMailStatus[]>`
-			SELECT s.*
-			FROM ModMailStatus s
-			JOIN ModMailUsers u
-			ON u.modMailStatus = s.id
-			`
+			const mid = await prisma.modMailUsers.findFirst({
+				where: {
+					discordId
+				}
+			})
 
-			return ticket[0] ?? null
+			if (!mid) return null
+
+			return await prisma.modMailStatus.findFirst({
+				where: {
+					id: mid.modMailStatus
+				}
+			})
 		}
 
 		/**
@@ -67,13 +72,13 @@ export default class ModMailPrisma {
 		 * @since 0.1.0 
 		 */
 		public static async isTicketChannel(channel: string): Promise<boolean> {
-			const status = await prisma.$queryRaw<ModMailStatus[]>`
-			SELECT id
-			FROM ModMailStatus
-			WHERE channel = ${channel}
-			`
+			const status = await prisma.modMailStatus.findFirst({
+				where: {
+					channel
+				}
+			})
 
-			return status.length > 0
+			return status !== null
 		}
 
 		/**
@@ -85,14 +90,22 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async getTicketUserByChannel(channel: string): Promise<string | null> {
-			const status = await prisma.$queryRaw<(ModMailStatus & ModMailUsers)[]>`
-			SELECT s.*, u.*
-			FROM ModMailStatus s
-			JOIN ModMailUsers u
-			ON s.id = u.modMailStatus
-			WHERE s.channel = ${channel}
-			`
-			return status[0].discordId ?? null
+			const modmailUsers = await prisma.modMailStatus.findFirst({
+				where: {
+					channel
+				}
+			})
+
+			if (!modmailUsers) return null
+
+			const discordUser = await prisma.modMailUsers.findFirst({
+				where: {
+					modMailStatus: modmailUsers.id
+				}
+			})
+			
+			if (!discordUser) return null
+			else return discordUser.discordId
 		}
 
 		/**
@@ -104,13 +117,14 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async getCategoryByName(name: string): Promise<string | null> {
-			const result = await prisma.$queryRaw<Categories[]>`
-			SELECT channelId
-			FROM Categories
-			WHERE name = ${name}
-			`
-
-			return result[0].channelId ?? null
+			const channel = await prisma.categories.findFirst({
+				where: {
+					name
+				}
+			})
+			
+			if (!channel) return null
+			else return channel.channelId
 		}
 
 		/**
@@ -135,13 +149,13 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async getCategoryBySearch(query: string): Promise<Categories[]> {
-			const result = await prisma.$queryRaw<Categories[]>`
-			SELECT *
-			FROM Categories
-			WHERE name LIKE ${query}
-			OR short = ${query}
-			`
-			return result
+			return await prisma.categories.findMany({
+				where: {
+					name: {
+						contains: query
+					}
+				}
+			})
 		}
 
 		/**
@@ -155,12 +169,11 @@ export default class ModMailPrisma {
 		 * @remarks **Do not confuse this for a print and delete function! The transcript is printed, but the ticket must still be deleted.**
 		 */
 		public static async printTranscript(discordId: string): Promise<string[][]> {
-			const output = await prisma.$queryRaw<ModMailMessage[]>`
-			SELECT *
-			FROM ModMailMessage
-			WHERE discordId = ${discordId}
-			AND hidden = FALSE
-			`
+			const output = await prisma.modMailMessage.findMany({
+				where: {
+					discordId
+				}
+			})
 			let printOutput = output.filter(e => e.hidden === false).map(entry => `${entry.anon ? "Anonymous" : `${entry.name} (${entry.author})`}: ${entry.content}`)
 			printOutput.unshift(`Ticket Transcript for ${discordId}:`)
 
@@ -180,11 +193,11 @@ export default class ModMailPrisma {
 		 * @since 0.1.0
 		 */
 		public static async getTemporaryMessage(discordId: string): Promise<PendingMessages | null> {
-			const message = await prisma.$queryRaw<PendingMessages[]>`
-			SELECT *
-			FROM PendingMessages
-			WHERE discordId = ${discordId}
-			`
+			const message = await prisma.pendingMessages.findMany({
+				where: {
+					discordId
+				}
+			})
 
 			if (!message[0]) return null
 			else {
