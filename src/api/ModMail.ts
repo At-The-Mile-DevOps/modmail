@@ -119,7 +119,14 @@ export default class ModMailPrisma {
 		public static async getCategoryByName(name: string): Promise<string | null> {
 			const channel = await prisma.categories.findFirst({
 				where: {
-					name: name.toLowerCase()
+					OR: [
+						{
+							name
+						},
+						{
+							short: name
+						}
+					]
 				}
 			})
 			
@@ -151,9 +158,18 @@ export default class ModMailPrisma {
 		public static async getCategoryBySearch(query: string): Promise<Categories[]> {
 			return await prisma.categories.findMany({
 				where: {
-					name: {
-						contains: query.toLowerCase()
-					}
+					OR: [
+						{
+							name: {
+								contains: query.toLowerCase()
+							}
+						},
+						{
+							short: {
+								contains: query.toLowerCase()
+							}
+						}
+					]
 				}
 			})
 		}
