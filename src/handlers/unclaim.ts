@@ -41,7 +41,7 @@ export default async function unclaimFlow(message: Message, traceId: string) {
 			return await message.reply("This ticket isn't claimed by you.")
 		}
 		
-		await ModMailPrisma.PATCH.resetClaimUser(ticketObject.discordId)
+		await ModMailPrisma.PATCH.resetClaimUser(status)
 
 		catLogger.events("Staff Unclaim Flow Concluded - Ticket Unclaimed")
 		
