@@ -165,9 +165,7 @@ export default class ModMailPrisma {
 							}
 						},
 						{
-							short: {
-								contains: query.toLowerCase()
-							}
+							short: query
 						}
 					]
 				}
